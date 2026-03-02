@@ -641,7 +641,8 @@ export default function Page() {
 
         <div className="hero-text">
           <h1>📘 ระบบทะเบียนคุมบันทึกการปรับปรุงรายการบัญชี</h1>
-          <p>บันทึก • กรอง • โหลดเข้า/ออก Excel และซิงก์ Google</p>
+          <p>บันทึก • โหลดเข้า/ออก Excel และซิงก์ Google</p>
+          <p>อลีโน วายเม สทา (จงมีความเพียรพยายามเสมอ)</p>
 
           <div className="session-row">
             <span className={`role-pill ${session.role === "admin" ? "role-admin" : "role-user"}`}>

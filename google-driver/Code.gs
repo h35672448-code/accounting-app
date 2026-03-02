@@ -1,5 +1,5 @@
 const SHEET_NAME = "records";
-const SPREADSHEET_ID = ""; // ถ้าเป็นสคริปต์แยก ให้ใส่ Spreadsheet ID
+const SPREADSHEET_ID = ""; // ใส่ได้ทั้ง Spreadsheet ID หรือ URL
 const TOKEN = ""; // ถ้าต้องการล็อก token ให้ใส่ค่าเดียวกับ GOOGLE_SCRIPT_TOKEN
 const NOTIFY_EMAIL = ""; // อีเมลแจ้งเตือนเริ่มต้น (ปล่อยว่างได้)
 
@@ -109,7 +109,18 @@ function ensureSheet_() {
 
 function getSpreadsheet_() {
   if (SPREADSHEET_ID) {
-    return SpreadsheetApp.openById(SPREADSHEET_ID);
+    var sheetId = normalizeSpreadsheetId_(SPREADSHEET_ID);
+    if (!sheetId) {
+      throw new Error("SPREADSHEET_ID ไม่ถูกต้อง: กรุณาใส่ ID หรือ URL ของ Google Sheets ให้ถูกต้อง");
+    }
+
+    try {
+      return SpreadsheetApp.openById(sheetId);
+    } catch (error) {
+      throw new Error(
+        "เปิดชีตไม่สำเร็จ: ตรวจสอบว่า ID ถูกต้อง และบัญชีที่ Deploy มีสิทธิ์เข้าถึงชีตนี้"
+      );
+    }
   }
 
   const active = SpreadsheetApp.getActiveSpreadsheet();
@@ -118,6 +129,15 @@ function getSpreadsheet_() {
   }
 
   return active;
+}
+
+function normalizeSpreadsheetId_(value) {
+  var raw = String(value || "").trim();
+  if (!raw) return "";
+
+  // รองรับทั้งกรณีใส่เป็น ID ตรง ๆ หรือใส่เป็น URL เต็ม
+  var match = raw.match(/[-\w]{25,}/);
+  return match ? match[0] : "";
 }
 
 function guardToken_(incomingToken) {

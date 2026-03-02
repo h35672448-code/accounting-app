@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="2100" viewBox="0 0 1400 2100">
+  <defs>
+    <style>
+      .title { font: 700 42px 'TH Sarabun New', 'Sarabun', sans-serif; fill: #1f2937; }
+      .label { font: 700 34px 'TH Sarabun New', 'Sarabun', sans-serif; fill: #111827; }
+      .small { font: 700 30px 'TH Sarabun New', 'Sarabun', sans-serif; fill: #111827; }
+      .box { fill: #dbeafe; stroke: #374151; stroke-width: 3; rx: 18; }
+      .decision { fill: #fde68a; stroke: #374151; stroke-width: 3; }
+      .io { fill: #93c5fd; stroke: #374151; stroke-width: 3; }
+      .store { fill: #fecaca; stroke: #374151; stroke-width: 3; }
+      .term { fill: #dcfce7; stroke: #374151; stroke-width: 3; }
+      .arrow { stroke: #111827; stroke-width: 3; fill: none; marker-end: url(#m); }
+    </style>
+    <marker id="m" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 z" fill="#111827"/>
+    </marker>
+  </defs>
+
+  <text x="700" y="70" text-anchor="middle" class="title">ผังงานระบบทะเบียนคุมบันทึกการปรับปรุงรายการบัญชี</text>
+
+  <ellipse cx="700" cy="140" rx="170" ry="55" class="term"/>
+  <text x="700" y="155" text-anchor="middle" class="label">เริ่มต้น</text>
+
+  <rect x="520" y="240" width="360" height="90" class="box"/>
+  <text x="700" y="296" text-anchor="middle" class="label">เปิดเว็บแอป</text>
+
+  <rect x="470" y="370" width="460" height="90" class="box"/>
+  <text x="700" y="426" text-anchor="middle" class="label">แสดงหน้าเข้าสู่ระบบ</text>
+
+  <polygon points="500,520 900,520 840,620 440,620" class="io"/>
+  <text x="700" y="582" text-anchor="middle" class="label">ผู้ใช้กรอกรหัสผ่าน</text>
+
+  <polygon points="700,700 980,860 700,1020 420,860" class="decision"/>
+  <text x="700" y="872" text-anchor="middle" class="label">รหัสผ่านถูกต้องหรือไม่?</text>
+
+  <rect x="120" y="1080" width="430" height="90" class="box"/>
+  <text x="335" y="1136" text-anchor="middle" class="label">แจ้งรหัสผ่านไม่ถูกต้อง</text>
+
+  <rect x="850" y="1080" width="430" height="90" class="box"/>
+  <text x="1065" y="1136" text-anchor="middle" class="label">กำหนดสิทธิ์ผู้ใช้</text>
+
+  <polygon points="1065,1220 1280,1360 1065,1500 850,1360" class="decision"/>
+  <text x="1065" y="1372" text-anchor="middle" class="label">ประเภทผู้ใช้</text>
+
+  <rect x="720" y="1560" width="300" height="210" class="box"/>
+  <text x="870" y="1610" text-anchor="middle" class="small">สิทธิ์ Admin</text>
+  <text x="870" y="1660" text-anchor="middle" class="small">เพิ่ม / แก้ไข / ลบ</text>
+  <text x="870" y="1710" text-anchor="middle" class="small">นำเข้า / ส่งออก</text>
+
+  <rect x="1090" y="1560" width="230" height="210" class="box"/>
+  <text x="1205" y="1610" text-anchor="middle" class="small">สิทธิ์ User</text>
+  <text x="1205" y="1660" text-anchor="middle" class="small">เพิ่ม / ดู / ส่งออก</text>
+
+  <rect x="860" y="1820" width="410" height="90" class="box"/>
+  <text x="1065" y="1876" text-anchor="middle" class="label">แสดงฟอร์มและตาราง</text>
+
+  <rect x="860" y="1950" width="410" height="90" class="box"/>
+  <text x="1065" y="2006" text-anchor="middle" class="label">ประมวลผลและบันทึกข้อมูล</text>
+
+  <ellipse cx="1065" cy="2080" rx="200" ry="55" class="store"/>
+  <text x="1065" y="2094" text-anchor="middle" class="label">บันทึกไฟล์ข้อมูลบัญชี</text>
+
+  <path d="M700,195 L700,240" class="arrow"/>
+  <path d="M700,330 L700,370" class="arrow"/>
+  <path d="M700,460 L700,520" class="arrow"/>
+  <path d="M700,620 L700,700" class="arrow"/>
+
+  <path d="M420,860 L335,1080" class="arrow"/>
+  <text x="370" y="980" class="small">ผิด</text>
+  <path d="M550,1125 L470,1125 L470,415 L470,415" class="arrow"/>
+
+  <path d="M980,860 L1065,1080" class="arrow"/>
+  <text x="1020" y="980" class="small">ถูก</text>
+  <path d="M1065,1170 L1065,1220" class="arrow"/>
+
+  <path d="M990,1450 L900,1560" class="arrow"/>
+  <path d="M1140,1450 L1205,1560" class="arrow"/>
+
+  <path d="M870,1770 L870,1865 L860,1865" class="arrow"/>
+  <path d="M1205,1770 L1205,1820" class="arrow"/>
+  <path d="M1065,1910 L1065,1950" class="arrow"/>
+  <path d="M1065,2040 L1065,2025" class="arrow"/>
+</svg>

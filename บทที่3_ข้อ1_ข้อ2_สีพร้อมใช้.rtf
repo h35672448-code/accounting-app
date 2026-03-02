@@ -1,0 +1,26 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Calibri;}{\f1 Consolas;}}
+{\colortbl;\red0\green0\blue0;\red215\green38\blue61;\red255\green159\blue28;\red42\green157\blue143;\red247\green127\blue0;\red0\green102\blue204;}
+\viewkind4\uc1\pard\cf1\fs28\b ข้อที่ 1 การเริ่มต้นการทำงานของระบบ (doGet)\b0\par
+\fs24\par
+\f1\fs22
+\cf2 function\cf1  \cf3 doGet\cf1 () \{\par
+\tab \cf2 return\cf1  \cf4 HtmlService\cf1 .\cf4 createHtmlOutputFromFile\cf1 (\cf5 "index"\cf1 );\par
+\}\par
+\f0\fs24\par
+\cf6 คำอธิบาย:\cf1  ฟังก์ชัน doGet() เป็นจุดเริ่มต้นของเว็บแอป เมื่อผู้ใช้เปิดลิงก์ระบบ ฟังก์ชันนี้จะเรียกไฟล์ index มาแสดงผลทันที\par
+ทำให้ผู้ใช้เข้าสู่หน้าล็อกอินและเริ่มใช้งานระบบทะเบียนคุมบัญชีได้อย่างถูกต้อง\par
+\par
+\b ข้อที่ 2 การตรวจสอบสิทธิ์ผู้ใช้งาน (login)\b0\par
+\par
+\f1\fs22
+\cf2 function\cf1  \cf3 login\cf1 (password) \{\par
+\tab \cf2 const\cf1  pw = String(password || \cf5 ""\cf1 ).trim();\par
+\tab \cf2 if\cf1  (pw === \cf5 "0000"\cf1 ) \cf2 return\cf1  \cf5 "admin"\cf1 ;\par
+\tab \cf2 if\cf1  (pw === \cf5 "1111"\cf1 ) \cf2 return\cf1  \cf5 "user"\cf1 ;\par
+\tab \cf2 return\cf1  \cf5 ""\cf1 ;\par
+\}\par
+\f0\fs24\par
+\cf6 คำอธิบาย:\cf1  ฟังก์ชัน login() ใช้ตรวจสอบรหัสผ่านและกำหนดบทบาทผู้ใช้งาน\par
+โดยคืนค่าเป็น admin หรือ user เพื่อกำหนดสิทธิ์การใช้งาน หากรหัสไม่ถูกต้องจะคืนค่าว่างเพื่อป้องกันการเข้าระบบ\par
+}

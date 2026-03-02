@@ -1,0 +1,36 @@
+{\rtf1\ansi\deff0
+{\fonttbl{\f0 Calibri;}{\f1 Consolas;}}
+{\colortbl;\red0\green0\blue0;\red215\green38\blue61;\red255\green159\blue28;\red42\green157\blue143;\red247\green127\blue0;\red0\green102\blue204;}
+\viewkind4\uc1\pard\cf1\fs28\b ข้อที่ 1 การเริ่มต้นเว็บแอปและคืนค่า HTML (ประมาณ 10 บรรทัด)\b0\par
+\fs24\par
+\f1\fs22
+\cf2 function\cf1  \cf3 doGet\cf1 () \{\par
+\tab \cf2 const\cf1  page = \cf5 "index"\cf1 ;\par
+\tab \cf2 const\cf1  output = \cf4 HtmlService\cf1 .\cf4 createHtmlOutputFromFile\cf1 (page);\par
+\tab output.\cf4 setTitle\cf1 (\cf5 "ทะเบียนคุม"\cf1 );\par
+\tab output.\cf4 addMetaTag\cf1 (\cf5 "viewport"\cf1 , \cf5 "width=device-width, initial-scale=1"\cf1 );\par
+\tab \cf2 const\cf1  xFrame = \cf4 HtmlService\cf1 .\cf4 XFrameOptionsMode\cf1 .ALLOWALL;\par
+\tab output.\cf4 setXFrameOptionsMode\cf1 (xFrame);\par
+\tab \cf2 return\cf1  output;\par
+\}\par
+\f0\fs24\par
+\cf6 คำอธิบาย:\cf1  โค้ดส่วนนี้กำหนดการเปิดหน้าเว็บหลักของระบบ พร้อมตั้งค่าหัวเรื่องและการแสดงผลบนมือถือ\par
+และกำหนดตัวเลือกด้านความปลอดภัยก่อนส่งหน้า HTML กลับไปยังผู้ใช้งาน\par
+\par
+\b ข้อที่ 2 การตรวจสอบสิทธิ์ผู้ใช้งาน (ประมาณ 10 บรรทัด)\b0\par
+\par
+\f1\fs22
+\cf2 function\cf1  \cf3 login\cf1 (password) \{\par
+\tab \cf2 const\cf1  pw = String(password || \cf5 ""\cf1 ).trim();\par
+\tab \cf2 const\cf1  adminPass = \cf5 "0000"\cf1 ;\par
+\tab \cf2 const\cf1  userPass = \cf5 "1111"\cf1 ;\par
+\tab \cf2 if\cf1  (!pw) \cf2 return\cf1  \cf5 ""\cf1 ;\par
+\tab \cf2 if\cf1  (pw === adminPass) \cf2 return\cf1  \cf5 "admin"\cf1 ;\par
+\tab \cf2 if\cf1  (pw === userPass) \cf2 return\cf1  \cf5 "user"\cf1 ;\par
+\tab \cf2 const\cf1  invalid = \cf5 ""\cf1 ;\par
+\tab \cf2 return\cf1  invalid;\par
+\}\par
+\f0\fs24\par
+\cf6 คำอธิบาย:\cf1  โค้ดส่วนนี้ใช้ตรวจสอบรหัสผ่านและกำหนดบทบาทผู้ใช้งานเป็น admin หรือ user\par
+หากรหัสผ่านไม่ถูกต้อง ระบบจะคืนค่าว่างเพื่อไม่อนุญาตให้เข้าสู่ระบบ\par
+}

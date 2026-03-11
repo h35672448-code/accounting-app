@@ -1,0 +1,70 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "username": "admin",
+      "password_hash": "$2a$10$//sDtVDCKt/GbgZvSBRxzepTPEAQaw7powsUDQa2N.fDvNenSae.m",
+      "role": "admin",
+      "is_active": 1,
+      "created_at": "2026-03-11T00:00:00.000Z",
+      "updated_at": "2026-03-11T00:00:00.000Z"
+    }
+  ],
+  "students": [
+    {
+      "id": 1,
+      "student_code": "66012001",
+      "first_name": "กิตติพงษ์",
+      "last_name": "สายชล",
+      "department": "ช่างยนต์",
+      "class_room": "ปวช.2/1",
+      "allergy_note": "แพ้เพนิซิลลิน",
+      "chronic_note": "",
+      "created_at": "2026-03-11T00:00:00.000Z",
+      "updated_at": "2026-03-11T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "student_code": "66013044",
+      "first_name": "พิมพ์ชนก",
+      "last_name": "คำแก้ว",
+      "department": "คอมพิวเตอร์ธุรกิจ",
+      "class_room": "ปวช.2/2",
+      "allergy_note": "",
+      "chronic_note": "",
+      "created_at": "2026-03-11T00:00:00.000Z",
+      "updated_at": "2026-03-11T00:00:00.000Z"
+    }
+  ],
+  "medicines": [
+    {
+      "id": 1,
+      "medicine_code": "MED-001",
+      "name": "Paracetamol 500mg",
+      "image_url": "",
+      "stock_qty": 50,
+      "reorder_level": 10,
+      "expire_date": "2027-03-30",
+      "created_at": "2026-03-11T00:00:00.000Z",
+      "updated_at": "2026-03-11T00:00:00.000Z"
+    },
+    {
+      "id": 2,
+      "medicine_code": "MED-011",
+      "name": "Oral Rehydration Salt",
+      "image_url": "",
+      "stock_qty": 8,
+      "reorder_level": 10,
+      "expire_date": "2026-10-12",
+      "created_at": "2026-03-11T00:00:00.000Z",
+      "updated_at": "2026-03-11T00:00:00.000Z"
+    }
+  ],
+  "visits": [],
+  "visit_medicines": [],
+  "medicine_stock_logs": [],
+  "news": [],
+  "feedback": [],
+  "alerts": [],
+  "audit_logs": []
+}

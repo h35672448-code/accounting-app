@@ -10,13 +10,21 @@ type DriverResponse = {
   error?: string;
 };
 
+function normalizeDriverError(errorMessage: string): string {
+  if (errorMessage.toLowerCase().includes("unsupported action")) {
+    return "Web App URL นี้ไม่รองรับ pullRecords/pushRecords (น่าจะเป็นสคริปต์ของ nurse-system). กรุณาใช้ URL /exec ของสคริปต์บัญชีแยกต่างหาก";
+  }
+
+  return errorMessage;
+}
+
 function getConfig() {
   const scriptUrl = process.env.GOOGLE_SCRIPT_URL?.trim();
   const token = process.env.GOOGLE_SCRIPT_TOKEN?.trim() || "";
   const notifyEmail = process.env.GOOGLE_NOTIFY_EMAIL?.trim() || "";
 
   if (!scriptUrl) {
-    throw new Error("ยังไม่ได้ตั้ง GOOGLE_SCRIPT_URL ใน .env.local");
+    throw new Error("ยังไม่ได้ตั้ง GOOGLE_SCRIPT_URL ใน Environment Variables");
   }
 
   return { scriptUrl, token, notifyEmail };
@@ -52,7 +60,7 @@ export async function GET() {
       return NextResponse.json(
         {
           ok: false,
-          error: driverData.error || "Google Driver ตอบกลับไม่สำเร็จ"
+          error: normalizeDriverError(driverData.error || "Google Driver ตอบกลับไม่สำเร็จ")
         },
         { status: 502 }
       );
@@ -79,18 +87,13 @@ export async function POST(request: NextRequest) {
     };
     const records = Array.isArray(body.records) ? body.records : [];
 
-
     const payload: Record<string, unknown> = {
       action: "pushRecords",
       records
     };
 
-    if (token) {
-      payload.token = token;
-    }
-    if (notifyEmail) {
-      payload.notifyEmail = notifyEmail;
-    }
+    if (token) payload.token = token;
+    if (notifyEmail) payload.notifyEmail = notifyEmail;
 
     const driverResponse = await fetch(scriptUrl, {
       method: "POST",
@@ -106,7 +109,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           ok: false,
-          error: driverData.error || "Google Driver ตอบกลับไม่สำเร็จ"
+          error: normalizeDriverError(driverData.error || "Google Driver ตอบกลับไม่สำเร็จ")
         },
         { status: 502 }
       );

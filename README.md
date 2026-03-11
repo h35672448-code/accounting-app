@@ -4,8 +4,7 @@
 - บันทึกข้อมูล 11 ช่อง
 - กรองประเภทและช่วงวันที่
 - นำเข้า/ส่งออก Excel (.xlsx)
-- เก็บข้อมูลด้วย localStorage
-- ซิงก์ข้อมูลขึ้น/ลง Google Sheets (ผ่าน Google Apps Script Driver)
+- เก็บข้อมูลด้วย localStorage และซิงก์สำรองกับ Google Drive/Sheets
 - วันที่ตั้งค่าอัตโนมัติเป็นวันปัจจุบันทุกครั้งที่เริ่มรายการใหม่
 
 ## เริ่มใช้งาน
@@ -17,30 +16,58 @@ npm run dev
 
 เปิด `http://localhost:3000`
 
-## เชื่อม Google Sheets/Drive (แบบเบา)
+## ระบบห้องพยาบาล (พอร์ตเดียว 3000)
 
-1. คัดลอกโค้ดจาก `google-driver/Code.gs` ไปที่ Google Apps Script
-2. ตั้งค่าในสคริปต์:
-   - `SPREADSHEET_ID` (ถ้าเป็นสคริปต์แยก)
-   - `TOKEN` (ถ้าต้องการล็อก)
-   - `NOTIFY_EMAIL` (ถ้าต้องการให้ส่งเมลหลังซิงก์)
-3. Deploy เป็น Web App แล้วคัดลอก URL ที่ลงท้าย `/exec`
-4. สร้างไฟล์ `.env.local` จาก `.env.example` แล้วใส่ค่า:
+หน้านี้อยู่ในโปรเจกต์เดียวกับ Next.js (ไม่ต้องรัน `nurse-system`):
+- หน้าใช้งาน: `http://localhost:3000/nurse`
+- ตรวจสุขภาพ API: `http://localhost:3000/api/nurse/health`
 
-```bash
-cp .env.example .env.local
-```
+ไฟล์โค้ดหลักของห้องพยาบาล:
+- `app/nurse/*`
+- `app/api/nurse/store/route.ts`
+- `app/api/nurse/health/route.ts`
+- `lib/nurse-drive.ts`
+
+Environment แนะนำใน `.env.local`:
 
 ```env
-GOOGLE_SCRIPT_URL="https://script.google.com/macros/s/XXXXXXXXXXXX/exec"
-GOOGLE_SCRIPT_TOKEN=""
+# ถ้ามี Web App คนละตัวสำหรับ nurse ให้ใส่ NURSE_* โดยตรง
+NURSE_SCRIPT_URL="https://script.google.com/macros/s/REPLACE_WITH_NURSE_WEBAPP_ID/exec"
+NURSE_SCRIPT_TOKEN="2026"
+NURSE_AUTO_SEED="1"
+```
+
+หมายเหตุ:
+- ระบบ nurse ใช้ Google Sheets ผ่าน Apps Script action `pullEntity/pushEntity`
+- หากไม่ตั้ง `NURSE_SCRIPT_URL` ระบบจะใช้ `GOOGLE_SCRIPT_URL` แทน
+
+## โหมดฐานข้อมูลระยะยาว (Google Drive/Sheets)
+
+1. คัดลอกโค้ดจาก `google-driver/Code.gs` ไปวางใน Google Apps Script
+2. ตั้งค่าใน `Code.gs` หรือ Script Properties:
+   - `SPREADSHEET_ID`
+   - `TOKEN`
+   - `SHEET_NAME` (ค่าเริ่มต้น `records`)
+3. Deploy เป็น Web app (`Execute as: Me`, `Who has access: Anyone`) และคัดลอก URL `/exec`
+4. ตั้งค่า Environment Variables จาก `.env.example`
+5. หน้าเว็บจะทำงานดังนี้:
+   - บันทึก/นำเข้า Excel -> ซิงก์ขึ้น Google อัตโนมัติ
+   - หลังล็อกอิน -> ดึงข้อมูลล่าสุดจาก Google อัตโนมัติ
+
+### Environment Variables (แนะนำใช้ `.env.local`)
+
+สร้างไฟล์ `.env.local`:
+
+```env
+GOOGLE_SCRIPT_URL="https://script.google.com/macros/s/REPLACE_WITH_ACCOUNTING_WEBAPP_ID/exec"
+GOOGLE_SCRIPT_TOKEN="2026"
 GOOGLE_NOTIFY_EMAIL=""
 ```
 
-5. รัน `npm run dev` ใหม่
-6. การซิงก์:
-   - ระบบจะอัปขึ้น Google อัตโนมัติเมื่อ `เพิ่ม/แก้ไข/ลบ/นำเข้า`
-   - ปุ่ม `☁️ ดึงจาก Google` ใช้ดึงข้อมูลล่าสุดกลับมา
+หมายเหตุสำคัญ:
+- `GOOGLE_SCRIPT_URL` ต้องเป็น URL ที่ลงท้าย `/exec` (ไม่ใช่ `/edit`)
+- `SPREADSHEET_ID` ใน Apps Script ต้องเป็น ID ล้วน (ไม่ใส่ `/edit`)
+- อย่าพิมพ์ `KEY=value` ที่ prompt แล้วคิดว่าเป็นการแก้ไฟล์ env; ต้องบันทึกลง `.env.local` จริง
 
 ## โครงไฟล์หลัก
 

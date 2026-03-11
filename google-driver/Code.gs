@@ -1,7 +1,9 @@
 const SHEET_NAME = "records";
+const LOG_SHEET_NAME = "_sync_log";
 const SPREADSHEET_ID = ""; // ใส่ได้ทั้ง Spreadsheet ID หรือ URL
 const TOKEN = ""; // ถ้าต้องการล็อก token ให้ใส่ค่าเดียวกับ GOOGLE_SCRIPT_TOKEN
 const NOTIFY_EMAIL = ""; // อีเมลแจ้งเตือนเริ่มต้น (ปล่อยว่างได้)
+const MAX_RECORDS = 50000;
 
 const HEADERS = [
   "วันที่",

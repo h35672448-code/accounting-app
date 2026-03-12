@@ -75,7 +75,6 @@ export default function VideoPage() {
     <>
       <section className={styles.hero}>
         <h2 className={styles.heroTitle}>โหมดกล้องวิดีโอคอล</h2>
-        <p className={styles.heroText}>ใช้สำหรับติดตามอาการเบื้องต้นระยะไกลแบบรวดเร็ว และลดความแออัดหน้าห้องพยาบาล</p>
       </section>
 
       {message ? <section className={styles.statusBanner}>{message}</section> : null}
@@ -84,7 +83,6 @@ export default function VideoPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>ตั้งค่าห้องคอล</h3>
-            <p className={styles.sectionSub}>เลือกแพลตฟอร์ม กำหนดชื่อผู้ใช้ และรหัสห้องก่อนเริ่ม</p>
           </div>
 
           <form className={styles.formGrid} onSubmit={openCall}>
@@ -141,7 +139,6 @@ export default function VideoPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>พรีวิวอุปกรณ์</h3>
-            <p className={styles.sectionSub}>ตรวจภาพและเสียงก่อนเข้าห้องจริง</p>
           </div>
 
           <div className={styles.tableWrap} style={{ padding: 10 }}>

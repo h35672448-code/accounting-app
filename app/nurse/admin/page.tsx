@@ -5,7 +5,6 @@ export default function AdminEntryPage() {
   return (
     <section className={styles.panel}>
       <h2 className={styles.sectionTitle}>Admin Center</h2>
-      <p className={styles.sectionSub}>เข้าสู่ศูนย์จัดการผู้ดูแลระบบ</p>
       <div className={styles.toolbar}>
         <Link href="/nurse/dashboard" className={`${styles.button} ${styles.btnPrimary}`}>
           เปิด Dashboard

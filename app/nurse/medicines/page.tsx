@@ -254,7 +254,6 @@ export default function MedicinesPage() {
     <>
       <section className={styles.hero}>
         <h2 className={styles.heroTitle}>คลังยา (มีรูป)</h2>
-        <p className={styles.heroText}>ฟิลด์ครบ: รูปยา, รหัสยา, ชื่อยา, ประเภทยา, จำนวน, หน่วย, วันหมดอายุ, หมายเหตุ พร้อมปุ่ม เพิ่ม/เพิ่มสต็อก/แก้ไข/ลบ</p>
       </section>
 
       {lowStockCount > 0 ? (
@@ -267,7 +266,6 @@ export default function MedicinesPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>{editingId ? "แก้ไขรายการยา" : "เพิ่มยา"}</h3>
-            <p className={styles.sectionSub}>ข้อมูลถูกบันทึกลง Google Sheet</p>
           </div>
 
           <form onSubmit={submitForm} className={styles.formGrid}>
@@ -361,7 +359,6 @@ export default function MedicinesPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>ค้นหาและสถานะ</h3>
-            <p className={styles.sectionSub}>ค้นหาแก้ไขรายการยาได้ทันที</p>
           </div>
           <input className={styles.input} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="ค้นหายา" />
 
@@ -377,7 +374,6 @@ export default function MedicinesPage() {
       <section className={styles.panel}>
         <div>
           <h3 className={styles.sectionTitle}>ตารางคลังยา ({filtered.length} รายการ)</h3>
-          <p className={styles.sectionSub}>ปุ่มหลัก: เพิ่มยา, เพิ่มสต็อก, แก้ไข, ลบ</p>
         </div>
 
         <div className={styles.tableWrap}>

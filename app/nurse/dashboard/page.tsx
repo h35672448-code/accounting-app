@@ -23,7 +23,6 @@ export default function DashboardPage() {
     <>
       <section className={styles.hero}>
         <h2 className={styles.heroTitle}>Dashboard Admin</h2>
-        <p className={styles.heroText}>ศูนย์ควบคุมหลักของระบบห้องพยาบาล พร้อมเมนูด้านซ้าย สถิติเรียลไทม์ และปุ่มลัดสำหรับงานสำคัญ</p>
       </section>
 
       <section className={styles.adminShell}>
@@ -52,7 +51,6 @@ export default function DashboardPage() {
           <section className={styles.panel}>
             <div>
               <h3 className={styles.sectionTitle}>ปุ่มลัดหลัก</h3>
-              <p className={styles.sectionSub}>ใช้งานเร็วสำหรับงานประจำวันของพยาบาลและผู้ดูแลระบบ</p>
             </div>
             <div className={styles.toolbar}>
               <Link href="/nurse/queue" className={`${styles.button} ${styles.btnPrimary}`}>
@@ -77,7 +75,6 @@ export default function DashboardPage() {
             <article className={styles.panel}>
               <div>
                 <h3 className={styles.sectionTitle}>คิวล่าสุด</h3>
-                <p className={styles.sectionSub}>3 รายการล่าสุดที่ต้องติดตาม</p>
               </div>
               <ul className={styles.listPlain}>
                 <li>คิว #12 | ปวดท้องเฉียบพลัน | รอตรวจ</li>
@@ -89,7 +86,6 @@ export default function DashboardPage() {
             <article className={styles.panel}>
               <div>
                 <h3 className={styles.sectionTitle}>แจ้งเตือนคลังยา</h3>
-                <p className={styles.sectionSub}>รายการที่ควรเติมสต็อกภายในสัปดาห์นี้</p>
               </div>
               <ul className={styles.listPlain}>
                 <li>Paracetamol 500mg เหลือ 12 เม็ด</li>
@@ -102,7 +98,6 @@ export default function DashboardPage() {
           <section id="reports" className={styles.panel}>
             <div>
               <h3 className={styles.sectionTitle}>รายงานสถิติ</h3>
-              <p className={styles.sectionSub}>ส่งออกข้อมูลและสรุปผลตามช่วงเวลา</p>
             </div>
             <div className={styles.toolbar}>
               <button className={`${styles.button} ${styles.btnPrimary}`}>📈 รายงานรายวัน</button>

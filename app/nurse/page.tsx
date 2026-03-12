@@ -32,7 +32,7 @@ const quickActions = [
   },
   {
     href: "/nurse/review",
-    icon: "⭐",
+    icon: "💬",
     title: "ประเมินบริการ",
     text: "ให้คะแนนการบริการ ความรวดเร็ว และความพึงพอใจ",
     iconClass: styles.iconYellow
@@ -58,9 +58,6 @@ export default function NurseHomePage() {
     <>
       <section className={styles.hero}>
         <h2 className={styles.heroTitle}>หน้า Home สำหรับนักศึกษา</h2>
-        <p className={styles.heroText}>
-          หน้านี้รวมข่าว เวรพยาบาล และเมนูใช้งานหลัก 4 ขั้นตอน: แจ้งอาการ, ดูคิว, ประเมินบริการ, และเข้าสู่ระบบผู้ดูแล
-        </p>
       </section>
 
       <section className={styles.cardGrid}>
@@ -78,7 +75,6 @@ export default function NurseHomePage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>ข่าวประจำวันนี้</h3>
-            <p className={styles.sectionSub}>ข่าวสุขภาพและคำแนะนำจากห้องพยาบาล</p>
           </div>
           <ul className={styles.listPlain}>
             <li>เปิดลงทะเบียนฉีดวัคซีนไข้หวัดใหญ่ วันที่ 18-20 มีนาคม 2026</li>
@@ -93,7 +89,6 @@ export default function NurseHomePage() {
         <article className={styles.panel} id="today-shift">
           <div>
             <h3 className={styles.sectionTitle}>เวรวันนี้</h3>
-            <p className={styles.sectionSub}>ทีมเจ้าหน้าที่พร้อมให้บริการ</p>
           </div>
           <div className={styles.shiftCard}>
             <p className={styles.infoText}>ช่วงเช้า (08:00 - 12:00)</p>

@@ -1,14 +1,10 @@
 "use client";
 
-import { FormEvent, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import styles from "../nurse.module.css";
-
-const demoCredential = {
-  username: "admin",
-  password: "admin1234"
-};
+import { ensureUsersSeed, findUserCredential, setCurrentSession } from "../lib/auth";
 
 export default function NurseLoginPage() {
   const router = useRouter();
@@ -18,33 +14,36 @@ export default function NurseLoginPage() {
 
   const canSubmit = useMemo(() => username.trim() !== "" && password.trim() !== "", [username, password]);
 
+  useEffect(() => {
+    ensureUsersSeed();
+  }, []);
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (username.trim() === demoCredential.username && password.trim() === demoCredential.password) {
-      setError("");
-      router.push("/nurse/dashboard");
+    const found = findUserCredential(username, password);
+    if (!found) {
+      setError("เข้าสู่ระบบไม่สำเร็จ: ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
       return;
     }
 
-    setError("เข้าสู่ระบบไม่สำเร็จ: Demo user คือ admin / admin1234");
+    setCurrentSession({
+      username: found.username,
+      role: found.role,
+      loginAt: new Date().toISOString()
+    });
+    setError("");
+    router.push(found.role === "admin" ? "/nurse/dashboard" : "/nurse/video");
   }
 
   return (
     <section className={styles.gridTwo}>
       <article className={styles.hero}>
         <h2 className={styles.heroTitle}>Login สำหรับผู้ดูแลระบบ</h2>
-        <p className={styles.heroText}>สิทธิ์ Admin ใช้จัดการคิวผู้ป่วย ข้อมูลนักศึกษา บันทึกการรักษา คลังยา ข่าว และรายงานประจำวัน</p>
-        <ul className={styles.listPlain}>
-          <li>รองรับโหมด Token/JWT เมื่อผูกฐานข้อมูลจริง</li>
-          <li>แยกสิทธิ์ Admin, Nurse, Viewer ได้ในขั้น production</li>
-          <li>บันทึก audit log ทุกการแก้ไขข้อมูลสำคัญ</li>
-        </ul>
       </article>
 
       <article className={styles.panel}>
         <div>
           <h3 className={styles.sectionTitle}>Admin Sign In</h3>
-          <p className={styles.sectionSub}>กรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าสู่ระบบ</p>
         </div>
 
         <form onSubmit={handleSubmit} className={styles.miniGrid}>

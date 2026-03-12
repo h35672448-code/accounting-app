@@ -20,6 +20,8 @@ type Treatment = {
   date: string;
 };
 
+const USER_STORAGE_KEY = "nurse_current_user";
+
 const EMPTY_FORM: Omit<Treatment, "id" | "date"> = {
   queueNo: "",
   studentId: "",
@@ -102,6 +104,7 @@ function treatmentToRow(item: Treatment): StoreRow {
 
 function rowToTreatment(row: StoreRow, index: number): Treatment {
   const payload = parsePayload(row.instruction);
+  const nurse = toText(payload?.nurse) || toText(row.caregiver || row.nurse_name) || "ไม่ระบุ";
   return {
     id: toNumber(row.id, index + 1),
     queueNo: toText(row.visit_id),
@@ -111,7 +114,7 @@ function rowToTreatment(row: StoreRow, index: number): Treatment {
     treatment: toText(payload?.treatment),
     medicine: toText(row.dosage),
     medicineQty: toText(payload?.medicineQty) || `${toNumber(row.qty, 0)}`,
-    nurse: toText(payload?.nurse),
+    nurse,
     status: (toText(payload?.status) || "รักษาแล้ว") as TreatmentStatus,
     date: new Date(toText(row.created_at)).toLocaleString("th-TH")
   };
@@ -137,6 +140,19 @@ export default function TreatmentPage() {
 
   useEffect(() => {
     void loadTreatments();
+  }, []);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(USER_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as { username?: unknown };
+      const username = toText(parsed.username);
+      if (!username) return;
+      setForm((prev) => (prev.nurse ? prev : { ...prev, nurse: username }));
+    } catch {
+      // Ignore malformed localStorage payload.
+    }
   }, []);
 
   async function loadTreatments() {
@@ -248,7 +264,6 @@ export default function TreatmentPage() {
     <>
       <section className={styles.hero}>
         <h2 className={styles.heroTitle}>บันทึกการรักษา</h2>
-        <p className={styles.heroText}>ฟอร์มครบ: เลขคิว, รหัสนักศึกษา, อาการ, การรักษา, ยาที่จ่าย, จำนวนยา, ผู้รักษา และสถานะผลการรักษา</p>
       </section>
 
       {message ? <section className={styles.statusBanner}>{message}</section> : null}
@@ -257,7 +272,6 @@ export default function TreatmentPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>{editingId ? "แก้ไขบันทึกการรักษา" : "บันทึกการรักษาใหม่"}</h3>
-            <p className={styles.sectionSub}>ปุ่มหลัก: บันทึก / แก้ไข</p>
           </div>
 
           <form onSubmit={submitForm} className={styles.formGrid}>
@@ -320,7 +334,6 @@ export default function TreatmentPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>ค้นหาบันทึก</h3>
-            <p className={styles.sectionSub}>ค้นหาจากเลขคิว รหัสนักศึกษา ชื่อ หรืออาการ</p>
           </div>
           <input className={styles.input} value={search} onChange={(event) => setSearch(event.target.value)} placeholder="ค้นหาบันทึก" />
         </article>

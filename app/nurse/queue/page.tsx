@@ -10,6 +10,7 @@ type QueueItem = {
   id: number;
   queueNo: number;
   name: string;
+  caregiver: string;
   symptom: string;
   time: string;
   status: QueueStatus;
@@ -54,6 +55,7 @@ function mapQueue(visits: StoreRow[], students: StoreRow[]): QueueItem[] {
         id: toNumber(row.id, index + 1),
         queueNo: index + 1,
         name: toText(student ? studentName(student) : row.student_name) || "ไม่ระบุชื่อ",
+        caregiver: toText(row.caregiver || row.nurse_name) || "ไม่ระบุ",
         symptom: toText(row.symptom) || "-",
         time: formatTime(row.visit_at) || "-",
         status: (toText(row.triage_status) || "รอคัดกรอง") as QueueStatus
@@ -134,7 +136,6 @@ export default function QueuePage() {
     <>
       <section className={styles.hero}>
         <h2 className={styles.heroTitle}>หน้าแสดงคิวผู้ป่วย</h2>
-        <p className={styles.heroText}>ดูคิวแบบตารางและจัดการสถานะได้ทันที: เรียกคิว, ตรวจแล้ว, ส่งโรงพยาบาล, ยกเลิก</p>
       </section>
 
       {message ? <section className={styles.statusBanner}>{message}</section> : null}
@@ -143,7 +144,6 @@ export default function QueuePage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>ตารางคิว</h3>
-            <p className={styles.sectionSub}>คลิกแถวเพื่อเลือกคิวที่ต้องการจัดการ</p>
           </div>
 
           <div className={styles.tableWrap}>
@@ -152,6 +152,7 @@ export default function QueuePage() {
                 <tr>
                   <th>คิว</th>
                   <th>ชื่อ</th>
+                  <th>ผู้ดูแล</th>
                   <th>อาการ</th>
                   <th>เวลา</th>
                   <th>สถานะ</th>
@@ -160,17 +161,18 @@ export default function QueuePage() {
               <tbody>
                 {loading ? (
                   <tr>
-                    <td colSpan={5}>กำลังโหลดคิว...</td>
+                    <td colSpan={6}>กำลังโหลดคิว...</td>
                   </tr>
                 ) : queue.length === 0 ? (
                   <tr>
-                    <td colSpan={5}>ยังไม่มีคิวผู้ป่วย</td>
+                    <td colSpan={6}>ยังไม่มีคิวผู้ป่วย</td>
                   </tr>
                 ) : (
                   queue.map((item) => (
                     <tr key={item.id} onClick={() => setSelectedId(item.id)} style={{ cursor: "pointer" }}>
                       <td>{item.queueNo}</td>
                       <td>{item.name}</td>
+                      <td>{item.caregiver}</td>
                       <td>{item.symptom}</td>
                       <td>{item.time}</td>
                       <td>
@@ -187,7 +189,6 @@ export default function QueuePage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>ปุ่มจัดการคิว (Admin)</h3>
-            <p className={styles.sectionSub}>เลือกคิวจากตารางก่อนเพื่อกดคำสั่ง</p>
           </div>
 
           {selected ? (
@@ -197,6 +198,8 @@ export default function QueuePage() {
                 <p className={styles.infoValue}>#{selected.queueNo}</p>
                 <p className={styles.infoText}>ชื่อ</p>
                 <p className={styles.infoValue}>{selected.name}</p>
+                <p className={styles.infoText}>ผู้ดูแล</p>
+                <p className={styles.infoValue}>{selected.caregiver}</p>
                 <p className={styles.infoText}>อาการ</p>
                 <p className={styles.infoValue}>{selected.symptom}</p>
                 <p className={styles.infoText}>สถานะ</p>

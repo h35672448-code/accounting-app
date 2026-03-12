@@ -172,7 +172,6 @@ export default function ReviewPage() {
     <>
       <section className={styles.hero}>
         <h2 className={styles.heroTitle}>ประเมินบริการ</h2>
-        <p className={styles.heroText}>ให้คะแนนการบริการ ความรวดเร็ว และความพึงพอใจ พร้อมแสดงความคิดเห็น</p>
       </section>
 
       {message ? <section className={styles.statusBanner}>{message}</section> : null}
@@ -209,7 +208,6 @@ export default function ReviewPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>สรุปผล (Admin)</h3>
-            <p className={styles.sectionSub}>คะแนนเฉลี่ยรวม {average}/5 จาก {reviews.length} รายการ</p>
           </div>
           <div className={styles.toolbar}>
             <button className={`${styles.button} ${styles.btnSoft}`}>📊 ดูผลประเมิน</button>

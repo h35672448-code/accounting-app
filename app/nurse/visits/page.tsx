@@ -11,6 +11,7 @@ type Visit = {
   studentId: number;
   studentCode: string;
   studentName: string;
+  caregiver: string;
   symptom: string;
   severity: Severity;
   time: string;
@@ -27,6 +28,7 @@ const INITIAL_VISITS: Visit[] = [
     studentId: 1,
     studentCode: "66012001",
     studentName: "กิตติพงษ์ สายชล",
+    caregiver: "admin",
     symptom: "ปวดศีรษะ",
     severity: "ปานกลาง",
     time: "09:10",
@@ -39,6 +41,7 @@ const INITIAL_VISITS: Visit[] = [
     studentId: 2,
     studentCode: "66013044",
     studentName: "พิมพ์ชนก คำแก้ว",
+    caregiver: "admin",
     symptom: "หายใจไม่สะดวก",
     severity: "หนัก",
     time: "10:05",
@@ -51,10 +54,13 @@ const INITIAL_VISITS: Visit[] = [
 const EMPTY_FORM: VisitForm = {
   studentCode: "",
   studentName: "",
+  caregiver: "",
   symptom: "",
   severity: "ปกติ",
   time: ""
 };
+
+const USER_STORAGE_KEY = "nurse_current_user";
 
 function toNumber(value: unknown, fallback = 0) {
   const parsed = Number(value);
@@ -124,6 +130,8 @@ function visitToRow(item: Visit): StoreRow {
     event_note: item.note,
     student_code: item.studentCode,
     student_name: item.studentName,
+    caregiver: item.caregiver,
+    nurse_name: item.caregiver,
     updated_at: now,
     created_at: now
   };
@@ -147,6 +155,7 @@ function mapVisitsFromRows(visitRows: StoreRow[], studentsRows: StoreRow[]): Vis
         studentId,
         studentCode: toText(student?.student_code || row.student_code),
         studentName: toText(student ? studentNameFromRow(student) : row.student_name),
+        caregiver: toText(row.caregiver || row.nurse_name) || "ไม่ระบุ",
         symptom: toText(row.symptom),
         severity,
         time: formatTime(row.visit_at),
@@ -186,6 +195,19 @@ export default function VisitsPage() {
 
   useEffect(() => {
     void loadData();
+  }, []);
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem(USER_STORAGE_KEY);
+      if (!raw) return;
+      const parsed = JSON.parse(raw) as { username?: unknown };
+      const username = toText(parsed.username);
+      if (!username) return;
+      setForm((prev) => (prev.caregiver ? prev : { ...prev, caregiver: username }));
+    } catch {
+      // Ignore malformed localStorage payload.
+    }
   }, []);
 
   async function loadData() {
@@ -269,12 +291,13 @@ export default function VisitsPage() {
     const payload: VisitForm = {
       studentCode: form.studentCode.trim(),
       studentName: form.studentName.trim(),
+      caregiver: form.caregiver.trim(),
       symptom: form.symptom.trim(),
       severity: form.severity,
       time: form.time.trim()
     };
 
-    if (!payload.studentCode || !payload.studentName || !payload.symptom || !payload.time) {
+    if (!payload.studentCode || !payload.studentName || !payload.caregiver || !payload.symptom || !payload.time) {
       setMessage("กรอกข้อมูลผู้ป่วยให้ครบ");
       return;
     }
@@ -329,6 +352,7 @@ export default function VisitsPage() {
     setForm({
       studentCode: visit.studentCode,
       studentName: visit.studentName,
+      caregiver: visit.caregiver,
       symptom: visit.symptom,
       severity: visit.severity,
       time: visit.time
@@ -375,7 +399,6 @@ export default function VisitsPage() {
     <>
       <section className={styles.hero}>
         <h2 className={styles.heroTitle}>ผู้เข้ารับบริการ (แจ้งอาการ/จองคิว)</h2>
-        <p className={styles.heroText}>บันทึกผู้ป่วย จัดระดับอาการ จ่ายยา และส่งต่อโรงพยาบาลในหน้าจอเดียว</p>
       </section>
 
       {alerts.length > 0 ? (
@@ -394,7 +417,6 @@ export default function VisitsPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>{editingId ? "แก้ไขข้อมูลผู้ป่วย" : "เพิ่มผู้ป่วย"}</h3>
-            <p className={styles.sectionSub}>รองรับปุ่มพิเศษเมื่อระดับอาการเป็น "หนัก"</p>
           </div>
 
           <form onSubmit={upsertVisit} className={styles.formGrid}>
@@ -431,6 +453,19 @@ export default function VisitsPage() {
                 className={styles.input}
                 value={form.symptom}
                 onChange={(event) => setForm((prev) => ({ ...prev, symptom: event.target.value }))}
+              />
+            </div>
+
+            <div>
+              <label className={styles.label} htmlFor="visit-caregiver">
+                ผู้ดูแล
+              </label>
+              <input
+                id="visit-caregiver"
+                className={styles.input}
+                value={form.caregiver}
+                onChange={(event) => setForm((prev) => ({ ...prev, caregiver: event.target.value }))}
+                placeholder="เช่น admin หรือ พยาบาลวิลาสินี"
               />
             </div>
 
@@ -486,7 +521,6 @@ export default function VisitsPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>รายละเอียดผู้ป่วย</h3>
-            <p className={styles.sectionSub}>เลือกแถวจากตารางด้านล่างเพื่อจัดการรายการ</p>
           </div>
 
           <div>
@@ -508,6 +542,8 @@ export default function VisitsPage() {
               <p className={styles.infoValue}>{selectedVisit.studentCode}</p>
               <p className={styles.infoText}>ชื่อ</p>
               <p className={styles.infoValue}>{selectedVisit.studentName}</p>
+              <p className={styles.infoText}>ผู้ดูแล</p>
+              <p className={styles.infoValue}>{selectedVisit.caregiver}</p>
               <p className={styles.infoText}>สถานะ</p>
               <p className={styles.infoValue}>{selectedVisit.status}</p>
 
@@ -567,7 +603,6 @@ export default function VisitsPage() {
       <section className={styles.panel}>
         <div>
           <h3 className={styles.sectionTitle}>รายการผู้เข้ารับบริการ ({filteredVisits.length} รายการ)</h3>
-          <p className={styles.sectionSub}>ปุ่มหลักครบ: เพิ่มผู้ป่วย, จ่ายยา, ส่งโรงพยาบาล, แก้ไข, ลบ, ดูรายละเอียด</p>
         </div>
 
         <div className={styles.tableWrap}>
@@ -577,6 +612,7 @@ export default function VisitsPage() {
                 <th>เวลา</th>
                 <th>รหัสนักศึกษา</th>
                 <th>ชื่อ</th>
+                <th>ผู้ดูแล</th>
                 <th>อาการ</th>
                 <th>ระดับอาการ</th>
                 <th>สถานะ</th>
@@ -585,11 +621,11 @@ export default function VisitsPage() {
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6}>กำลังโหลดข้อมูล...</td>
+                  <td colSpan={7}>กำลังโหลดข้อมูล...</td>
                 </tr>
               ) : filteredVisits.length === 0 ? (
                 <tr>
-                  <td colSpan={6}>ยังไม่มีรายการผู้เข้ารับบริการ</td>
+                  <td colSpan={7}>ยังไม่มีรายการผู้เข้ารับบริการ</td>
                 </tr>
               ) : (
                 filteredVisits.map((visit) => (
@@ -602,6 +638,7 @@ export default function VisitsPage() {
                     <td>{visit.time}</td>
                     <td>{visit.studentCode}</td>
                     <td>{visit.studentName}</td>
+                    <td>{visit.caregiver}</td>
                     <td>{visit.symptom}</td>
                     <td>
                       <span className={getBadgeClass(visit.severity)}>{visit.severity}</span>

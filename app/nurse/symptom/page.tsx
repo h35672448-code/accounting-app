@@ -155,7 +155,6 @@ export default function SymptomPage() {
     <>
       <section className={styles.hero}>
         <h2 className={styles.heroTitle}>หน้าแจ้งอาการ</h2>
-        <p className={styles.heroText}>นักศึกษากรอกอาการเบื้องต้นก่อนเข้าห้องพยาบาล ช่วยจัดคิวเร็วขึ้นและคัดกรองอาการหนักได้ไวขึ้น</p>
       </section>
 
       {message ? <section className={styles.statusBanner}>{message}</section> : null}
@@ -164,7 +163,6 @@ export default function SymptomPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>ฟอร์มแจ้งอาการ</h3>
-            <p className={styles.sectionSub}>ข้อมูลที่ต้องกรอก: รหัสนักศึกษา, ชื่อ, นามสกุล, แผนก, ชั้น, อาการ, รายละเอียด</p>
           </div>
 
           <form onSubmit={submitReport} className={styles.formGrid}>
@@ -261,7 +259,6 @@ export default function SymptomPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>รายการที่ส่งล่าสุด</h3>
-            <p className={styles.sectionSub}>แสดงจากข้อมูล Google Sheet จริง</p>
           </div>
 
           <div className={styles.tableWrap}>

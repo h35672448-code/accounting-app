@@ -199,7 +199,6 @@ export default function NewsPage() {
     <>
       <section className={styles.hero}>
         <h2 className={styles.heroTitle}>ข่าวประกาศ</h2>
-        <p className={styles.heroText}>จัดการข่าวประชาสัมพันธ์ด้วยปุ่ม เพิ่ม, แก้ไข, ลบ, ดูข่าว</p>
       </section>
 
       {message ? <section className={styles.statusBanner}>{message}</section> : null}
@@ -208,7 +207,6 @@ export default function NewsPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>{editingId ? "แก้ไขข่าว" : "เพิ่มข่าว"}</h3>
-            <p className={styles.sectionSub}>ข้อมูลข่าวถูกบันทึกลง Google Sheet</p>
           </div>
 
           <form onSubmit={submitNews} className={styles.miniGrid}>
@@ -247,7 +245,6 @@ export default function NewsPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>รายการข่าวล่าสุด</h3>
-            <p className={styles.sectionSub}>ดูข่าวที่เผยแพร่ล่าสุดจากห้องพยาบาล</p>
           </div>
 
           <div className={styles.newsGrid}>

@@ -259,7 +259,6 @@ export default function StudentsPage() {
     <>
       <section className={styles.hero}>
         <h2 className={styles.heroTitle}>ประวัตินักศึกษา (มีรูป)</h2>
-        <p className={styles.heroText}>จัดการข้อมูลนักศึกษาแบบครบฟิลด์: รูป, เบอร์โทร, โรคประจำตัว พร้อมปุ่ม เพิ่ม/แก้ไข/ลบ/ค้นหา</p>
       </section>
 
       {message ? <section className={styles.statusBanner}>{message}</section> : null}
@@ -268,7 +267,6 @@ export default function StudentsPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>{editingId ? "แก้ไขข้อมูลนักศึกษา" : "เพิ่มนักศึกษา"}</h3>
-            <p className={styles.sectionSub}>ข้อมูลจะบันทึกลง Google Sheet ทันที</p>
           </div>
 
           <form onSubmit={handleSubmit} className={styles.formGrid}>
@@ -385,7 +383,6 @@ export default function StudentsPage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>ค้นหานักศึกษา</h3>
-            <p className={styles.sectionSub}>ค้นหาด้วยรหัส ชื่อ แผนก หรือเบอร์โทร</p>
           </div>
 
           <div className={styles.toolbar}>
@@ -418,7 +415,6 @@ export default function StudentsPage() {
       <section className={styles.panel}>
         <div>
           <h3 className={styles.sectionTitle}>ตารางนักศึกษา ({filteredStudents.length} คน)</h3>
-          <p className={styles.sectionSub}>รองรับปุ่ม เพิ่ม, แก้ไข, ลบ, ดูประวัติการรักษา</p>
         </div>
 
         <div className={styles.tableWrap}>

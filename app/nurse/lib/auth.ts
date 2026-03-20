@@ -1,5 +1,7 @@
 "use client";
 
+import { fetchEntity, saveEntity, type StoreRow } from "./storeApi";
+
 export type NurseRole = "admin" | "user";
 
 export type NurseUserRecord = {
@@ -39,6 +41,46 @@ function defaultUsers(): NurseUserRecord[] {
   ];
 }
 
+function toNumber(value: unknown, fallback: number) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function toText(value: unknown) {
+  return String(value ?? "").trim();
+}
+
+function normalizeStoreUser(row: StoreRow, index: number): NurseUserRecord | null {
+  const username = toText(row.username);
+  if (!username) return null;
+
+  const fallbackPassword = username.toLowerCase() === "admin" ? "admin1234" : "";
+  const password = toText(row.password) || fallbackPassword;
+  if (!password) return null;
+
+  return {
+    id: toNumber(row.id, index + 1),
+    username,
+    password,
+    role: isRole(row.role) ? row.role : "user",
+    createdAt: toText(row.createdAt || row.created_at) || new Date().toISOString()
+  };
+}
+
+function userToStoreRow(user: NurseUserRecord): StoreRow {
+  const now = new Date().toISOString();
+  return {
+    id: user.id,
+    username: user.username,
+    password: user.password,
+    role: user.role,
+    is_active: 1,
+    createdAt: user.createdAt,
+    created_at: user.createdAt,
+    updated_at: now
+  };
+}
+
 export function getStoredUsers(): NurseUserRecord[] {
   if (!isBrowser()) return defaultUsers();
 
@@ -69,16 +111,55 @@ export function saveStoredUsers(users: NurseUserRecord[]) {
   window.localStorage.setItem(NURSE_USERS_STORAGE_KEY, JSON.stringify(users));
 }
 
-export function ensureUsersSeed(): NurseUserRecord[] {
-  const existing = getStoredUsers();
-  if (existing.length > 0) return existing;
+export async function saveUsersToStore(users: NurseUserRecord[]) {
+  saveStoredUsers(users);
+  await saveEntity(
+    "users",
+    users.map(userToStoreRow)
+  );
+}
+
+export async function loadUsersFromStore(): Promise<NurseUserRecord[]> {
+  const cachedUsers = getStoredUsers();
+
+  try {
+    const rows = await fetchEntity("users");
+    const users = rows
+      .map((row, index) => normalizeStoreUser(row, index))
+      .filter((row): row is NurseUserRecord => row !== null);
+
+    if (users.length > 0) {
+      saveStoredUsers(users);
+      return users;
+    }
+  } catch {
+    if (cachedUsers.length > 0) {
+      return cachedUsers;
+    }
+  }
+
+  if (cachedUsers.length > 0) {
+    return cachedUsers;
+  }
+
   const seeded = defaultUsers();
   saveStoredUsers(seeded);
+
+  try {
+    await saveUsersToStore(seeded);
+  } catch {
+    // Keep default local seed so login still works during temporary API issues.
+  }
+
   return seeded;
 }
 
-export function findUserCredential(username: string, password: string): NurseUserRecord | null {
-  const users = ensureUsersSeed();
+export async function ensureUsersSeed(): Promise<NurseUserRecord[]> {
+  return loadUsersFromStore();
+}
+
+export async function findUserCredential(username: string, password: string): Promise<NurseUserRecord | null> {
+  const users = await ensureUsersSeed();
   const targetUsername = username.trim().toLowerCase();
   const targetPassword = password.trim();
   return users.find((user) => user.username.toLowerCase() === targetUsername && user.password === targetPassword) || null;

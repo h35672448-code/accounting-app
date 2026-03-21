@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./nurse.module.css";
@@ -77,7 +77,6 @@ function rowToBanner(row: NewsRow, index: number): NewsBanner {
 }
 
 export default function NurseLayout({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
   const router = useRouter();
   const [mode, setMode] = useState<ThemeMode>("warm");
   const [language, setLanguage] = useState<UiLang>("th");
@@ -224,23 +223,18 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
               </p>
               <p className={styles.timeShift}>👩‍⚕️ {shiftByHour(now.getHours(), language)}</p>
             </div>
-            <details className={styles.quickMenu}>
-              <summary className={styles.quickMenuToggle}>{language === "th" ? "☰ เมนู" : "☰ Menu"}</summary>
-              <div className={styles.quickMenuPanel}>
-                {navItems.map((item) => {
-                  const isActive = pathname === item.href;
-                  return (
-                    <Link key={item.href} href={item.href} className={`${styles.quickMenuLink} ${isActive ? styles.quickMenuLinkActive : ""}`}>
-                      <span className={styles.navIcon}>{item.icon}</span>
-                      <span>{item.label[language]}</span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </details>
             <div className={styles.userChip}>{isAdminView ? (language === "th" ? "👤 ผู้ดูแล" : "👤 Admin") : language === "th" ? "👤 ผู้ใช้" : "👤 User"}</div>
           </div>
         </header>
+
+        <nav className={styles.topNav}>
+          {navItems.map((item) => (
+            <Link key={item.href} href={item.href} className={styles.navLinkTop}>
+              <span className={styles.navIcon}>{item.icon}</span>
+              <span>{item.label[language]}</span>
+            </Link>
+          ))}
+        </nav>
 
         {activeNews ? (
           <section className={styles.newsStrip}>

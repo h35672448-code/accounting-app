@@ -36,8 +36,12 @@ export default function NurseLoginPage() {
   }
 
   return (
-    <section className={`${styles.panel} ${styles.authPanel}`}>
-      <article>
+    <section className={styles.gridTwo}>
+      <article className={styles.hero}>
+        <h2 className={styles.heroTitle}>Login สำหรับผู้ดูแลระบบ</h2>
+      </article>
+
+      <article className={styles.panel}>
         <div>
           <h3 className={styles.sectionTitle}>Admin Sign In</h3>
         </div>

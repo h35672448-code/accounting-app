@@ -239,6 +239,8 @@
   grid-template-columns: 56px minmax(0, 1fr);
   gap: 10px;
   align-items: center;
+  color: inherit;
+  text-decoration: none;
 }
 
 .logoImage {

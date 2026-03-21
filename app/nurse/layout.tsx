@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./nurse.module.css";
@@ -77,7 +77,7 @@ function rowToBanner(row: NewsRow, index: number): NewsBanner {
 }
 
 export default function NurseLayout({ children }: { children: ReactNode }) {
-  const router = useRouter();
+  const pathname = usePathname();
   const [mode, setMode] = useState<ThemeMode>("warm");
   const [language, setLanguage] = useState<UiLang>("th");
   const [isAdminView, setIsAdminView] = useState(false);
@@ -199,6 +199,7 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
 
   const activeNews = newsList[newsIndex];
   const navItems = fullNavItems;
+  const isHomePage = pathname === "/nurse";
 
   return (
     <div className={`${styles.root} ${mode === "mono" ? styles.themeMono : styles.themeWarm}`}>
@@ -206,13 +207,13 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
 
       <div className={styles.layoutShell}>
         <header className={styles.topHeader}>
-          <div className={styles.logoBlock}>
+          <Link href="/nurse" className={styles.logoBlock}>
             <img src="/logo.png" alt="โลโก้ห้องพยาบาล" className={styles.logoImage} />
             <div>
               <h1 className={styles.brandTitle}>{language === "th" ? "ระบบห้องพยาบาล" : "Nurse Room System"}</h1>
               <p className={styles.brandSub}>Nurse Room Management</p>
             </div>
-          </div>
+          </Link>
 
           <div className={styles.topRight}>
             <div className={styles.timeCard}>
@@ -227,16 +228,18 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <nav className={styles.topNav}>
-          {navItems.map((item) => (
-            <Link key={item.href} href={item.href} className={styles.navLinkTop}>
-              <span className={styles.navIcon}>{item.icon}</span>
-              <span>{item.label[language]}</span>
-            </Link>
-          ))}
-        </nav>
+        {isHomePage ? (
+          <nav className={styles.topNav}>
+            {navItems.map((item) => (
+              <Link key={item.href} href={item.href} className={styles.navLinkTop}>
+                <span className={styles.navIcon}>{item.icon}</span>
+                <span>{item.label[language]}</span>
+              </Link>
+            ))}
+          </nav>
+        ) : null}
 
-        {activeNews ? (
+        {isHomePage && activeNews ? (
           <section className={styles.newsStrip}>
             <img src={activeNews.image} alt={activeNews.title || "รูปข่าวห้องพยาบาล"} className={styles.newsStripImage} />
             <div className={styles.newsStripBody}>
@@ -283,7 +286,7 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
           onClick={() => {
             window.localStorage.removeItem(NURSE_SESSION_STORAGE_KEY);
             setIsAdminView(false);
-            router.push("/nurse/login");
+            window.location.assign("/nurse/login");
           }}
           aria-label={language === "th" ? "ออกจากระบบ" : "Logout"}
           title={language === "th" ? "ออกจากระบบ" : "Logout"}

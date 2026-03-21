@@ -735,6 +735,13 @@
   min-height: 194px;
 }
 
+.menuCardCompact {
+  min-height: 112px;
+  align-content: center;
+  justify-items: start;
+  gap: 10px;
+}
+
 .menuCard::before {
   content: "";
   position: absolute;
@@ -791,6 +798,7 @@
   margin: 0;
   font-size: 1.02rem;
   font-weight: 800;
+  line-height: 1.3;
 }
 
 .cardText {

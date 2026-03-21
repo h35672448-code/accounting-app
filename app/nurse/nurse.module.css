@@ -192,6 +192,83 @@
   gap: 8px;
 }
 
+.quickMenu {
+  position: relative;
+}
+
+.quickMenu[open] .quickMenuToggle {
+  border-color: var(--focus-border);
+  box-shadow:
+    0 10px 18px rgba(86, 71, 51, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+}
+
+.quickMenuToggle {
+  list-style: none;
+  border-radius: 14px;
+  border: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, rgba(254, 250, 244, 0.95), rgba(246, 239, 228, 0.88));
+  padding: 8px 12px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-main);
+  white-space: nowrap;
+  cursor: pointer;
+  box-shadow:
+    0 10px 18px rgba(86, 71, 51, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+}
+
+.quickMenuToggle::-webkit-details-marker {
+  display: none;
+}
+
+.quickMenuPanel {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 210px;
+  max-height: min(65vh, 420px);
+  overflow: auto;
+  display: grid;
+  gap: 6px;
+  padding: 10px;
+  border-radius: 18px;
+  border: 1px solid var(--panel-border);
+  background:
+    linear-gradient(180deg, rgba(255, 252, 246, 0.97), rgba(247, 243, 236, 0.94));
+  box-shadow:
+    0 22px 36px rgba(52, 77, 116, 0.16),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  backdrop-filter: blur(12px);
+  z-index: 8;
+}
+
+.quickMenuLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: var(--text-main);
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 0.84rem;
+  font-weight: 700;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+
+.quickMenuLink:hover {
+  background: rgba(255, 255, 255, 0.72);
+  border-color: var(--panel-border);
+  transform: translateX(2px);
+}
+
+.quickMenuLinkActive {
+  background: rgba(255, 255, 255, 0.78);
+  border-color: var(--focus-border);
+}
+
 .timeCard {
   border-radius: 14px;
   border: 1px solid var(--panel-border);
@@ -494,6 +571,10 @@
   z-index: 1;
   display: grid;
   gap: 12px;
+}
+
+.authPanel {
+  max-width: 620px;
 }
 
 .hero {
@@ -1332,6 +1413,21 @@
 
   .userChip {
     text-align: center;
+  }
+
+  .quickMenu {
+    width: 100%;
+  }
+
+  .quickMenuToggle {
+    width: 100%;
+    text-align: center;
+  }
+
+  .quickMenuPanel {
+    left: 0;
+    right: 0;
+    min-width: 0;
   }
 
   .bottomDock {

@@ -11,21 +11,18 @@ export default function NurseLoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const canSubmit = useMemo(() => username.trim() !== "" && password.trim() !== "", [username, password]);
 
   useEffect(() => {
-    void ensureUsersSeed();
+    ensureUsersSeed();
   }, []);
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setLoading(true);
-    const found = await findUserCredential(username, password);
+    const found = findUserCredential(username, password);
     if (!found) {
       setError("เข้าสู่ระบบไม่สำเร็จ: ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง");
-      setLoading(false);
       return;
     }
 
@@ -35,17 +32,12 @@ export default function NurseLoginPage() {
       loginAt: new Date().toISOString()
     });
     setError("");
-    setLoading(false);
     router.push(found.role === "admin" ? "/nurse/dashboard" : "/nurse/video");
   }
 
   return (
-    <section className={styles.gridTwo}>
-      <article className={styles.hero}>
-        <h2 className={styles.heroTitle}>Login สำหรับผู้ดูแลระบบ</h2>
-      </article>
-
-      <article className={styles.panel}>
+    <section className={`${styles.panel} ${styles.authPanel}`}>
+      <article>
         <div>
           <h3 className={styles.sectionTitle}>Admin Sign In</h3>
         </div>
@@ -83,8 +75,8 @@ export default function NurseLoginPage() {
           {error ? <div className={styles.alertBox}>{error}</div> : null}
 
           <div className={styles.toolbar}>
-            <button type="submit" disabled={!canSubmit || loading} className={`${styles.button} ${styles.btnPrimary}`}>
-              {loading ? "กำลังตรวจสอบ..." : "🔐 เข้าสู่ระบบ"}
+            <button type="submit" disabled={!canSubmit} className={`${styles.button} ${styles.btnPrimary}`}>
+              🔐 เข้าสู่ระบบ
             </button>
             <Link href="/nurse" className={`${styles.button} ${styles.btnSoft}`}>
               🔙 กลับหน้าหลัก

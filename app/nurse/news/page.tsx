@@ -197,10 +197,6 @@ export default function NewsPage() {
 
   return (
     <>
-      <section className={styles.hero}>
-        <h2 className={styles.heroTitle}>ข่าวประกาศ</h2>
-      </section>
-
       {message ? <section className={styles.statusBanner}>{message}</section> : null}
 
       <section className={styles.gridTwo}>

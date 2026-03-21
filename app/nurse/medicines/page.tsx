@@ -252,10 +252,6 @@ export default function MedicinesPage() {
 
   return (
     <>
-      <section className={styles.hero}>
-        <h2 className={styles.heroTitle}>คลังยา (มีรูป)</h2>
-      </section>
-
       {lowStockCount > 0 ? (
         <section className={styles.alertBox}>⚠️ แจ้งเตือนยาใกล้หมด {lowStockCount} รายการ (ต่ำกว่า 10 หน่วย)</section>
       ) : null}

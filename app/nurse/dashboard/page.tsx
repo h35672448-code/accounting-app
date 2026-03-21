@@ -21,10 +21,6 @@ const statCards = [
 export default function DashboardPage() {
   return (
     <>
-      <section className={styles.hero}>
-        <h2 className={styles.heroTitle}>Dashboard Admin</h2>
-      </section>
-
       <section className={styles.adminShell}>
         <aside className={styles.sidebarPanel}>
           <h3 className={styles.sectionTitle}>เมนูผู้ดูแล</h3>

@@ -153,10 +153,6 @@ export default function SymptomPage() {
 
   return (
     <>
-      <section className={styles.hero}>
-        <h2 className={styles.heroTitle}>หน้าแจ้งอาการ</h2>
-      </section>
-
       {message ? <section className={styles.statusBanner}>{message}</section> : null}
 
       <section className={styles.gridTwo}>

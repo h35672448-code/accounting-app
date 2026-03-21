@@ -134,10 +134,6 @@ export default function QueuePage() {
 
   return (
     <>
-      <section className={styles.hero}>
-        <h2 className={styles.heroTitle}>หน้าแสดงคิวผู้ป่วย</h2>
-      </section>
-
       {message ? <section className={styles.statusBanner}>{message}</section> : null}
 
       <section className={styles.gridTwo}>

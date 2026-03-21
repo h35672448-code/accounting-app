@@ -262,10 +262,6 @@ export default function TreatmentPage() {
 
   return (
     <>
-      <section className={styles.hero}>
-        <h2 className={styles.heroTitle}>บันทึกการรักษา</h2>
-      </section>
-
       {message ? <section className={styles.statusBanner}>{message}</section> : null}
 
       <section className={styles.gridTwo}>

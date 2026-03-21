@@ -397,10 +397,6 @@ export default function VisitsPage() {
 
   return (
     <>
-      <section className={styles.hero}>
-        <h2 className={styles.heroTitle}>ผู้เข้ารับบริการ (แจ้งอาการ/จองคิว)</h2>
-      </section>
-
       {alerts.length > 0 ? (
         <section className={styles.alertBox}>
           {alerts.slice(0, 2).map((alert) => (

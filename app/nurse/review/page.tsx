@@ -170,10 +170,6 @@ export default function ReviewPage() {
 
   return (
     <>
-      <section className={styles.hero}>
-        <h2 className={styles.heroTitle}>ประเมินบริการ</h2>
-      </section>
-
       {message ? <section className={styles.statusBanner}>{message}</section> : null}
 
       <section className={styles.gridTwo}>

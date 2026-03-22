@@ -1,7 +1,8 @@
- "use client";
+"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { getCurrentRole } from "./lib/auth";
 import { NURSE_SHIFT_EVENT, type ShiftRecord, loadShiftSchedule } from "./lib/shiftSchedule";
 import styles from "./nurse.module.css";
 
@@ -59,15 +60,22 @@ const quickActions = [
 
 export default function NurseHomePage() {
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
+  const [role, setRole] = useState<"admin" | "user" | "guest">("guest");
 
   useEffect(() => {
     const syncShifts = () => setShifts(loadShiftSchedule());
+    const syncRole = () => setRole(getCurrentRole());
     syncShifts();
+    syncRole();
     window.addEventListener(NURSE_SHIFT_EVENT, syncShifts);
     window.addEventListener("storage", syncShifts);
+    window.addEventListener("storage", syncRole);
+    window.addEventListener("focus", syncRole);
     return () => {
       window.removeEventListener(NURSE_SHIFT_EVENT, syncShifts);
       window.removeEventListener("storage", syncShifts);
+      window.removeEventListener("storage", syncRole);
+      window.removeEventListener("focus", syncRole);
     };
   }, []);
 
@@ -111,9 +119,15 @@ export default function NurseHomePage() {
               </p>
             </div>
           ))}
-          <Link href="/nurse/dashboard#today-shift-editor" className={`${styles.button} ${styles.btnSoft}`}>
-            ✏️ แก้ไขเวร
-          </Link>
+          {role === "admin" ? (
+            <Link href="/nurse/dashboard#today-shift-editor" className={`${styles.button} ${styles.btnSoft}`}>
+              ✏️ แก้ไขเวร
+            </Link>
+          ) : (
+            <Link href="/nurse/login" className={`${styles.button} ${styles.btnSoft}`}>
+              🔐 เข้าสู่ระบบเพื่อแก้เวร
+            </Link>
+          )}
         </article>
       </section>
     </>

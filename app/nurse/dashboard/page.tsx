@@ -1,8 +1,10 @@
  "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import styles from "../nurse.module.css";
+import { getCurrentSession } from "../lib/auth";
 import { type ShiftRecord, getDefaultShifts, loadShiftSchedule, saveShiftSchedule } from "../lib/shiftSchedule";
 
 const adminSidebar = [
@@ -23,12 +25,23 @@ const statCards = [
 ];
 
 export default function DashboardPage() {
+  const router = useRouter();
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
   const [message, setMessage] = useState("");
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [authReady, setAuthReady] = useState(false);
 
   useEffect(() => {
+    const session = getCurrentSession();
+    if (!session || session.role !== "admin") {
+      router.replace("/nurse/login");
+      return;
+    }
+
+    setIsAdmin(true);
     setShifts(loadShiftSchedule());
-  }, []);
+    setAuthReady(true);
+  }, [router]);
 
   const shiftRows = useMemo(() => (shifts.length > 0 ? shifts : getDefaultShifts()), [shifts]);
 
@@ -42,8 +55,17 @@ export default function DashboardPage() {
   }
 
   function handleSaveShifts() {
+    if (!isAdmin) return;
     saveShiftSchedule(shiftRows);
     setMessage("บันทึกเวรเรียบร้อย");
+  }
+
+  if (!authReady) {
+    return (
+      <section className={styles.panel}>
+        <h3 className={styles.sectionTitle}>กำลังตรวจสอบสิทธิ์ผู้ดูแล...</h3>
+      </section>
+    );
   }
 
   return (

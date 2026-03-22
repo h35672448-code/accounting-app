@@ -500,6 +500,12 @@
   gap: 12px;
 }
 
+.pageActionBar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
 .authPanel {
   max-width: 620px;
 }
@@ -1096,6 +1102,24 @@
   background: var(--shift-bg);
   padding: 10px 12px;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72);
+}
+
+.shiftEditorGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 12px;
+}
+
+.shiftEditorCard {
+  border-radius: 18px;
+  padding: 16px;
+  border: 1px solid var(--panel-border);
+  background: linear-gradient(180deg, rgba(255, 252, 247, 0.95), rgba(247, 240, 229, 0.86));
+  box-shadow:
+    0 14px 28px rgba(52, 77, 116, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.84);
+  display: grid;
+  gap: 12px;
 }
 
 .adminShell {

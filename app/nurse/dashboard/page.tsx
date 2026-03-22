@@ -1,5 +1,9 @@
+ "use client";
+
 import Link from "next/link";
+import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import styles from "../nurse.module.css";
+import { type ShiftRecord, getDefaultShifts, loadShiftSchedule, saveShiftSchedule } from "../lib/shiftSchedule";
 
 const adminSidebar = [
   { href: "#overview", label: "Dashboard" },
@@ -19,6 +23,29 @@ const statCards = [
 ];
 
 export default function DashboardPage() {
+  const [shifts, setShifts] = useState<ShiftRecord[]>([]);
+  const [message, setMessage] = useState("");
+
+  useEffect(() => {
+    setShifts(loadShiftSchedule());
+  }, []);
+
+  const shiftRows = useMemo(() => (shifts.length > 0 ? shifts : getDefaultShifts()), [shifts]);
+
+  function handleShiftInput(id: ShiftRecord["id"], field: keyof Omit<ShiftRecord, "id">) {
+    return (event: ChangeEvent<HTMLInputElement>) => {
+      setShifts((prev) => {
+        const base = prev.length > 0 ? prev : getDefaultShifts();
+        return base.map((item) => (item.id === id ? { ...item, [field]: event.target.value } : item));
+      });
+    };
+  }
+
+  function handleSaveShifts() {
+    saveShiftSchedule(shiftRows);
+    setMessage("บันทึกเวรเรียบร้อย");
+  }
+
   return (
     <>
       <section className={styles.adminShell}>
@@ -102,6 +129,52 @@ export default function DashboardPage() {
               <button className={`${styles.button} ${styles.btnSoft}`}>💊 รายงานการใช้ยา</button>
               <button className={`${styles.button} ${styles.btnWarning}`}>📥 Export PDF</button>
               <button className={`${styles.button} ${styles.btnWarning}`}>📥 Export Excel</button>
+            </div>
+          </section>
+
+          <section id="today-shift-editor" className={styles.panel}>
+            <div>
+              <h3 className={styles.sectionTitle}>แก้ไขเวรวันนี้</h3>
+            </div>
+
+            {message ? <div className={styles.statusBanner}>{message}</div> : null}
+
+            <div className={styles.shiftEditorGrid}>
+              {shiftRows.map((shift) => (
+                <article key={shift.id} className={styles.shiftEditorCard}>
+                  <h4 className={styles.cardTitle}>{shift.label}</h4>
+                  <div className={styles.formGrid}>
+                    <div>
+                      <label className={styles.label}>ช่วงเวลา</label>
+                      <input className={styles.input} value={shift.time} onChange={handleShiftInput(shift.id, "time")} />
+                    </div>
+                    <div>
+                      <label className={styles.label}>ผู้รับเวร</label>
+                      <input className={styles.input} value={shift.nurse} onChange={handleShiftInput(shift.id, "nurse")} />
+                    </div>
+                    <div>
+                      <label className={styles.label}>ช่องทางติดต่อ</label>
+                      <input className={styles.input} value={shift.contact} onChange={handleShiftInput(shift.id, "contact")} />
+                    </div>
+                  </div>
+                </article>
+              ))}
+            </div>
+
+            <div className={styles.toolbar}>
+              <button className={`${styles.button} ${styles.btnPrimary}`} type="button" onClick={handleSaveShifts}>
+                💾 บันทึกเวร
+              </button>
+              <button
+                className={`${styles.button} ${styles.btnSoft}`}
+                type="button"
+                onClick={() => {
+                  setShifts(getDefaultShifts());
+                  setMessage("รีเซ็ตเวรเป็นค่าเริ่มต้นแล้ว");
+                }}
+              >
+                รีเซ็ตเวร
+              </button>
             </div>
           </section>
         </div>

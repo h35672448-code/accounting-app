@@ -1,4 +1,8 @@
+ "use client";
+
 import Link from "next/link";
+import { useEffect, useState } from "react";
+import { NURSE_SHIFT_EVENT, type ShiftRecord, loadShiftSchedule } from "./lib/shiftSchedule";
 import styles from "./nurse.module.css";
 
 const quickActions = [
@@ -54,6 +58,19 @@ const quickActions = [
 ];
 
 export default function NurseHomePage() {
+  const [shifts, setShifts] = useState<ShiftRecord[]>([]);
+
+  useEffect(() => {
+    const syncShifts = () => setShifts(loadShiftSchedule());
+    syncShifts();
+    window.addEventListener(NURSE_SHIFT_EVENT, syncShifts);
+    window.addEventListener("storage", syncShifts);
+    return () => {
+      window.removeEventListener(NURSE_SHIFT_EVENT, syncShifts);
+      window.removeEventListener("storage", syncShifts);
+    };
+  }, []);
+
   return (
     <>
       <section className={styles.cardGrid}>
@@ -84,18 +101,19 @@ export default function NurseHomePage() {
           <div>
             <h3 className={styles.sectionTitle}>เวรวันนี้</h3>
           </div>
-          <div className={styles.shiftCard}>
-            <p className={styles.infoText}>ช่วงเช้า (08:00 - 12:00)</p>
-            <p className={styles.infoValue}>พยาบาลวิลาสินี | ต่อ 108</p>
-          </div>
-          <div className={styles.shiftCard}>
-            <p className={styles.infoText}>ช่วงบ่าย (12:00 - 16:00)</p>
-            <p className={styles.infoValue}>พยาบาลธนภรณ์ | ต่อ 108</p>
-          </div>
-          <div className={styles.shiftCard}>
-            <p className={styles.infoText}>เวรฉุกเฉิน (16:00 - 20:00)</p>
-            <p className={styles.infoValue}>พยาบาลสุจิตรา | ต่อ 118</p>
-          </div>
+          {shifts.map((shift) => (
+            <div key={shift.id} className={styles.shiftCard}>
+              <p className={styles.infoText}>
+                {shift.label} ({shift.time})
+              </p>
+              <p className={styles.infoValue}>
+                {shift.nurse} | {shift.contact}
+              </p>
+            </div>
+          ))}
+          <Link href="/nurse/dashboard#today-shift-editor" className={`${styles.button} ${styles.btnSoft}`}>
+            ✏️ แก้ไขเวร
+          </Link>
         </article>
       </section>
     </>

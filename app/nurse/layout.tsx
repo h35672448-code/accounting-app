@@ -229,10 +229,10 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
 
         {!isHomePage ? (
           <div className={styles.pageActionBar}>
-            <button type="button" className={`${styles.button} ${styles.btnSoft}`} onClick={() => window.history.back()}>
+            <button type="button" className={`${styles.button} ${styles.pageBackButton}`} onClick={() => window.history.back()}>
               ← กลับ
             </button>
-            <Link href="/nurse" className={`${styles.button} ${styles.btnPrimary}`}>
+            <Link href="/nurse" className={`${styles.button} ${styles.pageHomeButton}`}>
               🏠 หน้าหลัก
             </Link>
           </div>

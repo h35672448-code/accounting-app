@@ -30,16 +30,27 @@ const primaryActions = [
   }
 ];
 
-const allTools = [
-  { href: "/nurse/dashboard", icon: "📊", title: "Dashboard" },
-  { href: "/nurse/treatment", icon: "🧾", title: "ประวัติการรักษา" },
+const focusTools = [
   { href: "/nurse/students", icon: "🎓", title: "นักศึกษา" },
-  { href: "/nurse/medicines", icon: "💊", title: "คลังยา" },
-  { href: "/nurse/news", icon: "📰", title: "ข่าว" },
-  { href: "/nurse/review", icon: "💬", title: "ประเมิน" },
-  { href: "/nurse/video", icon: "📹", title: "วิดีโอคอล" },
-  { href: "/nurse/login", icon: "🔐", title: "Login" }
+  { href: "/nurse/treatment", icon: "🧾", title: "ประวัติการรักษา" },
+  { href: "/nurse/visits", icon: "📑", title: "ประวัติการจ่ายยา" },
+  { href: "/nurse/medicines", icon: "💊", title: "คลังยา" }
 ];
+
+const utilityActions = {
+  admin: [
+    { href: "/nurse/dashboard", icon: "📊", title: "Dashboard" },
+    { href: "/nurse/news", icon: "📰", title: "ข่าว" },
+    { href: "/nurse/review", icon: "💬", title: "ประเมิน" },
+    { href: "/nurse/video", icon: "📹", title: "วิดีโอคอล" }
+  ],
+  guest: [
+    { href: "/nurse/news", icon: "📰", title: "ข่าว" },
+    { href: "/nurse/review", icon: "💬", title: "ประเมิน" },
+    { href: "/nurse/video", icon: "📹", title: "วิดีโอคอล" },
+    { href: "/nurse/login", icon: "🔐", title: "Login" }
+  ]
+};
 
 export default function NurseHomePage() {
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
@@ -62,20 +73,7 @@ export default function NurseHomePage() {
     };
   }, []);
 
-  const secondaryActions =
-    role === "admin"
-      ? [
-          { href: "/nurse/dashboard", icon: "📊", title: "Dashboard" },
-          { href: "/nurse/news", icon: "📰", title: "ข่าว" },
-          { href: "/nurse/review", icon: "💬", title: "ประเมิน" },
-          { href: "/nurse/video", icon: "📹", title: "วิดีโอคอล" }
-        ]
-      : [
-          { href: "/nurse/news", icon: "📰", title: "ข่าว" },
-          { href: "/nurse/review", icon: "💬", title: "ประเมิน" },
-          { href: "/nurse/video", icon: "📹", title: "วิดีโอคอล" },
-          { href: "/nurse/login", icon: "🔐", title: "Login" }
-        ];
+  const secondaryActions = role === "admin" ? utilityActions.admin : utilityActions.guest;
 
   return (
     <>
@@ -130,8 +128,8 @@ export default function NurseHomePage() {
         </article>
       </section>
 
-      <section className={styles.secondaryMenuRow} aria-label="เมนูเพิ่มเติม">
-        {secondaryActions.map((item) => (
+      <section className={styles.secondaryMenuRow} aria-label="เมนูข้อมูลหลัก">
+        {focusTools.map((item) => (
           <Link key={item.href} href={item.href} className={styles.secondaryMenuLink}>
             <span className={styles.secondaryMenuIcon}>{item.icon}</span>
             <span>{item.title}</span>
@@ -139,13 +137,12 @@ export default function NurseHomePage() {
         ))}
       </section>
 
-      <section className={styles.toolShelf} aria-label="ฟังก์ชันทั้งหมด">
+      <section className={styles.toolShelf} aria-label="เมนูเพิ่มเติม">
         <div className={styles.toolShelfHead}>
-          <h3 className={styles.sectionTitle}>ฟังก์ชันทั้งหมด</h3>
-          <p className={styles.sectionSub}>รวมเมนูที่ใช้งานต่อยอดได้ครบในจุดเดียว</p>
+          <h3 className={styles.sectionTitle}>เมนูเพิ่มเติม</h3>
         </div>
         <div className={styles.toolShelfGrid}>
-          {allTools.map((item) => (
+          {secondaryActions.map((item) => (
             <Link key={item.href} href={item.href} className={styles.toolPill}>
               <span className={styles.toolPillIcon}>{item.icon}</span>
               <span>{item.title}</span>

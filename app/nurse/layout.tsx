@@ -26,7 +26,6 @@ const NEWS_FALLBACK_IMAGE = "/logo.png";
 
 const fullNavItems = [
   { href: "/nurse", icon: "🏠", label: { th: "Home", en: "Home" } },
-  { href: "/nurse/dashboard", icon: "📊", label: { th: "Dashboard", en: "Dashboard" } },
   { href: "/nurse/treatment", icon: "🧾", label: { th: "ประวัติ", en: "History" } },
   { href: "/nurse/queue", icon: "📋", label: { th: "คิวผู้ป่วย", en: "Queue" } },
   { href: "/nurse/symptom", icon: "🩺", label: { th: "แจ้งอาการ", en: "Symptoms" } },
@@ -266,6 +265,9 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
       </div>
 
       <div className={styles.bottomDock}>
+        <Link href="/nurse/dashboard" className={styles.iconDockLink} title={language === "th" ? "แดชบอร์ด" : "Dashboard"}>
+          📊
+        </Link>
         <button
           type="button"
           className={styles.iconDockButton}

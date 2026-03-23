@@ -6,55 +6,27 @@ import { getCurrentRole } from "./lib/auth";
 import { NURSE_SHIFT_EVENT, type ShiftRecord, loadShiftSchedule } from "./lib/shiftSchedule";
 import styles from "./nurse.module.css";
 
-const quickActions = [
-  {
-    href: "/nurse/news",
-    icon: "📰",
-    title: "ข่าวห้องพยาบาล",
-    text: "ติดตามประกาศวัคซีน กิจกรรมสุขภาพ และข้อมูลสำคัญรายสัปดาห์",
-    iconClass: styles.iconBlue
-  },
+const primaryActions = [
   {
     href: "/nurse/dashboard#today-shift",
     icon: "👩‍⚕️",
     title: "เวรวันนี้",
-    text: "ดูตารางเจ้าหน้าที่เวร ช่วงเวลา และช่องทางติดต่อฉุกเฉิน",
+    text: "ดูรายชื่อเจ้าหน้าที่เวรและช่องทางติดต่อในวันนี้",
     iconClass: styles.iconGreen
   },
   {
     href: "/nurse/symptom",
     icon: "🩺",
     title: "แจ้งอาการ",
-    text: "บันทึกอาการล่วงหน้าเพื่อจัดคิวและลดเวลารอหน้าห้องพยาบาล",
+    text: "กรอกอาการล่วงหน้าเพื่อลดเวลารอคิวหน้าห้องพยาบาล",
     iconClass: styles.iconOrange
   },
   {
     href: "/nurse/queue",
     icon: "📋",
     title: "ดูคิว",
-    text: "ตรวจสอบคิวผู้ป่วยและสถานะล่าสุดแบบเรียลไทม์",
+    text: "ติดตามสถานะคิวผู้ป่วยและการเรียกคิวล่าสุด",
     iconClass: styles.iconBlue
-  },
-  {
-    href: "/nurse/review",
-    icon: "💬",
-    title: "ประเมินบริการ",
-    text: "ให้คะแนนการบริการ ความรวดเร็ว และความพึงพอใจ",
-    iconClass: styles.iconYellow
-  },
-  {
-    href: "/nurse/video",
-    icon: "📹",
-    title: "วิดีโอคอล",
-    text: "เปิดห้องคอลติดตามอาการเบื้องต้นได้ทันที",
-    iconClass: styles.iconBlue
-  },
-  {
-    href: "/nurse/login",
-    icon: "🔐",
-    title: "Admin Login",
-    text: "เข้าสู่ระบบผู้ดูแลเพื่อจัดการข้อมูลนักศึกษา ยา คิว และรายงาน",
-    iconClass: styles.iconRed
   }
 ];
 
@@ -79,13 +51,29 @@ export default function NurseHomePage() {
     };
   }, []);
 
+  const secondaryActions =
+    role === "admin"
+      ? [
+          { href: "/nurse/dashboard", icon: "📊", title: "Dashboard" },
+          { href: "/nurse/news", icon: "📰", title: "ข่าว" },
+          { href: "/nurse/review", icon: "💬", title: "ประเมิน" },
+          { href: "/nurse/video", icon: "📹", title: "วิดีโอคอล" }
+        ]
+      : [
+          { href: "/nurse/news", icon: "📰", title: "ข่าว" },
+          { href: "/nurse/review", icon: "💬", title: "ประเมิน" },
+          { href: "/nurse/video", icon: "📹", title: "วิดีโอคอล" },
+          { href: "/nurse/login", icon: "🔐", title: "Login" }
+        ];
+
   return (
     <>
       <section className={styles.cardGrid}>
-        {quickActions.map((card) => (
+        {primaryActions.map((card) => (
           <Link key={card.title} href={card.href} className={`${styles.menuCard} ${styles.menuCardCompact}`}>
             <span className={`${styles.cardIcon} ${card.iconClass}`}>{card.icon}</span>
             <h3 className={styles.cardTitle}>{card.title}</h3>
+            <p className={styles.cardText}>{card.text}</p>
           </Link>
         ))}
       </section>
@@ -129,6 +117,15 @@ export default function NurseHomePage() {
             </Link>
           )}
         </article>
+      </section>
+
+      <section className={styles.secondaryMenuRow} aria-label="เมนูเพิ่มเติม">
+        {secondaryActions.map((item) => (
+          <Link key={item.href} href={item.href} className={styles.secondaryMenuLink}>
+            <span className={styles.secondaryMenuIcon}>{item.icon}</span>
+            <span>{item.title}</span>
+          </Link>
+        ))}
       </section>
     </>
   );

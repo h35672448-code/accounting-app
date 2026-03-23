@@ -24,6 +24,20 @@ const LANG_STORAGE_KEY = "nurse_ui_lang";
 const NEWS_ROTATE_MS = 30_000;
 const NEWS_FALLBACK_IMAGE = "/logo.png";
 
+const fullNavItems = [
+  { href: "/nurse", icon: "🏠", label: { th: "Home", en: "Home" } },
+  { href: "/nurse/dashboard", icon: "📊", label: { th: "Dashboard", en: "Dashboard" } },
+  { href: "/nurse/treatment", icon: "🧾", label: { th: "ประวัติ", en: "History" } },
+  { href: "/nurse/queue", icon: "📋", label: { th: "คิวผู้ป่วย", en: "Queue" } },
+  { href: "/nurse/symptom", icon: "🩺", label: { th: "แจ้งอาการ", en: "Symptoms" } },
+  { href: "/nurse/students", icon: "🎓", label: { th: "นักศึกษา", en: "Students" } },
+  { href: "/nurse/medicines", icon: "💊", label: { th: "คลังยา", en: "Medicines" } },
+  { href: "/nurse/news", icon: "📰", label: { th: "ข่าว", en: "News" } },
+  { href: "/nurse/review", icon: "💬", label: { th: "ประเมิน", en: "Reviews" } },
+  { href: "/nurse/video", icon: "📹", label: { th: "วิดีโอคอล", en: "Video Call" } },
+  { href: "/nurse/login", icon: "🔐", label: { th: "Login", en: "Login" } }
+];
+
 function shiftByHour(hour: number, language: UiLang) {
   if (language === "en") {
     if (hour < 12) return "Morning Shift 08:00-12:00";
@@ -185,6 +199,7 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
 
   const activeNews = newsList[newsIndex];
   const isHomePage = pathname === "/nurse";
+  const navItems = fullNavItems;
 
   return (
     <div className={`${styles.root} ${mode === "mono" ? styles.themeMono : styles.themeWarm}`}>
@@ -212,6 +227,15 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
             <div className={styles.userChip}>{isAdminView ? (language === "th" ? "👤 ผู้ดูแล" : "👤 Admin") : language === "th" ? "👤 ผู้ใช้" : "👤 User"}</div>
           </div>
         </header>
+
+        <nav className={styles.topNav}>
+          {navItems.map((item) => (
+            <Link key={item.href} href={item.href} className={styles.navLinkTop}>
+              <span className={styles.navIcon}>{item.icon}</span>
+              <span>{item.label[language]}</span>
+            </Link>
+          ))}
+        </nav>
 
         {isHomePage && activeNews ? (
           <section className={styles.newsStrip}>

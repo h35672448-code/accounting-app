@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import styles from "../nurse.module.css";
 import { fetchEntity, saveEntity, StoreRow } from "../lib/storeApi";
 
@@ -63,21 +63,11 @@ function newsToRow(item: NewsItem): StoreRow {
   };
 }
 
-function fileToDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error("อ่านไฟล์รูปไม่สำเร็จ"));
-    reader.readAsDataURL(file);
-  });
-}
-
 export default function NewsPage() {
   const [news, setNews] = useState<NewsItem[]>([]);
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [image, setImage] = useState("");
-  const [imageFileName, setImageFileName] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -114,30 +104,7 @@ export default function NewsPage() {
     setTitle("");
     setDetail("");
     setImage("");
-    setImageFileName("");
     setEditingId(null);
-  }
-
-  async function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setMessage("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
-      return;
-    }
-    if (file.size > 1_500_000) {
-      setMessage("รูปใหญ่เกิน 1.5MB กรุณาลดขนาดรูปก่อนอัปโหลด");
-      return;
-    }
-
-    try {
-      const dataUrl = await fileToDataUrl(file);
-      setImage(dataUrl);
-      setImageFileName(file.name);
-      setMessage("");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "อัปโหลดรูปไม่สำเร็จ");
-    }
   }
 
   async function persistNews(next: NewsItem[], successMessage: string) {
@@ -155,6 +122,11 @@ export default function NewsPage() {
 
   async function submitNews(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (image.trim().startsWith("data:")) {
+      setMessage("กรุณาใช้ลิงก์รูปภาพแบบปกติเท่านั้น ระบบนี้ยังไม่รองรับการอัปโหลดไฟล์รูปเข้า Google Sheet");
+      return;
+    }
 
     const payload = {
       title: title.trim(),
@@ -185,7 +157,6 @@ export default function NewsPage() {
     setTitle(item.title);
     setDetail(item.detail);
     setImage(item.image);
-    setImageFileName("");
     setMessage("");
   }
 
@@ -215,9 +186,14 @@ export default function NewsPage() {
               <textarea className={styles.textarea} value={detail} onChange={(event) => setDetail(event.target.value)} />
             </div>
             <div>
-              <label className={styles.label}>รูปภาพ (อัปโหลด)</label>
-              <input type="file" accept="image/*" className={styles.input} onChange={(event) => void handleImageUpload(event)} />
-              {imageFileName ? <p className={styles.infoText}>ไฟล์: {imageFileName}</p> : null}
+              <label className={styles.label}>ลิงก์รูปภาพ</label>
+              <input
+                className={styles.input}
+                value={image}
+                onChange={(event) => setImage(event.target.value)}
+                placeholder="https://example.com/news.jpg"
+              />
+              <p className={styles.infoText}>ใช้ลิงก์รูปภาพปกติ เช่น จาก Google Drive แบบลิงก์ตรง หรือเว็บฝากรูป</p>
               {image ? (
                 <img
                   src={image}

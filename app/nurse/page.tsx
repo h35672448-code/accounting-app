@@ -30,6 +30,17 @@ const primaryActions = [
   }
 ];
 
+const allTools = [
+  { href: "/nurse/dashboard", icon: "📊", title: "Dashboard" },
+  { href: "/nurse/treatment", icon: "🧾", title: "ประวัติการรักษา" },
+  { href: "/nurse/students", icon: "🎓", title: "นักศึกษา" },
+  { href: "/nurse/medicines", icon: "💊", title: "คลังยา" },
+  { href: "/nurse/news", icon: "📰", title: "ข่าว" },
+  { href: "/nurse/review", icon: "💬", title: "ประเมิน" },
+  { href: "/nurse/video", icon: "📹", title: "วิดีโอคอล" },
+  { href: "/nurse/login", icon: "🔐", title: "Login" }
+];
+
 export default function NurseHomePage() {
   const [shifts, setShifts] = useState<ShiftRecord[]>([]);
   const [role, setRole] = useState<"admin" | "user" | "guest">("guest");
@@ -126,6 +137,21 @@ export default function NurseHomePage() {
             <span>{item.title}</span>
           </Link>
         ))}
+      </section>
+
+      <section className={styles.toolShelf} aria-label="ฟังก์ชันทั้งหมด">
+        <div className={styles.toolShelfHead}>
+          <h3 className={styles.sectionTitle}>ฟังก์ชันทั้งหมด</h3>
+          <p className={styles.sectionSub}>รวมเมนูที่ใช้งานต่อยอดได้ครบในจุดเดียว</p>
+        </div>
+        <div className={styles.toolShelfGrid}>
+          {allTools.map((item) => (
+            <Link key={item.href} href={item.href} className={styles.toolPill}>
+              <span className={styles.toolPillIcon}>{item.icon}</span>
+              <span>{item.title}</span>
+            </Link>
+          ))}
+        </div>
       </section>
     </>
   );

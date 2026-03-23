@@ -1155,6 +1155,62 @@
   font-size: 1rem;
 }
 
+.toolShelf {
+  border-radius: 22px;
+  border: 1px solid var(--panel-border);
+  background:
+    linear-gradient(180deg, rgba(255, 252, 246, 0.92), rgba(247, 243, 236, 0.84));
+  box-shadow:
+    0 18px 34px rgba(53, 74, 112, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  padding: 14px 16px;
+  display: grid;
+  gap: 12px;
+}
+
+.toolShelfHead {
+  display: grid;
+  gap: 2px;
+}
+
+.toolShelfGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.toolPill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 9px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--panel-border);
+  background: rgba(255, 253, 249, 0.88);
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 0.82rem;
+  font-weight: 700;
+  box-shadow:
+    0 10px 16px rgba(52, 77, 116, 0.07),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  transition: transform 0.18s ease, border-color 0.18s ease, background 0.18s ease;
+}
+
+.toolPill:hover {
+  transform: translateY(-1px);
+  border-color: var(--focus-border);
+  background: rgba(255, 251, 245, 0.96);
+}
+
+.toolPillIcon {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  font-size: 0.98rem;
+}
+
 .shiftEditorGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

@@ -1227,6 +1227,56 @@
   font-size: 0.98rem;
 }
 
+.reportControl {
+  display: grid;
+  gap: 8px;
+}
+
+.reportPreview {
+  border-radius: 18px;
+  border: 1px solid var(--panel-border);
+  background:
+    linear-gradient(180deg, rgba(255, 252, 247, 0.92), rgba(246, 240, 231, 0.82));
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+  box-shadow:
+    0 14px 24px rgba(52, 77, 116, 0.09),
+    inset 0 1px 0 rgba(255, 255, 255, 0.84);
+}
+
+.reportPreviewHead {
+  display: grid;
+  gap: 4px;
+}
+
+.reportMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+
+.reportMetricCard {
+  border-radius: 14px;
+  border: 1px solid rgba(208, 189, 164, 0.56);
+  background: rgba(255, 255, 255, 0.72);
+  padding: 10px 12px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.88);
+}
+
+.reportMetricLabel {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--text-muted);
+}
+
+.reportMetricValue {
+  margin: 4px 0 0;
+  font-size: 0.96rem;
+  font-weight: 800;
+  color: var(--text-main);
+}
+
 .shiftEditorGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));

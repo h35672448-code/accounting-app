@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import styles from "../nurse.module.css";
 import { fetchEntity, saveEntity, StoreRow } from "../lib/storeApi";
 
@@ -18,10 +18,13 @@ type Student = {
 
 type StudentForm = Omit<Student, "id">;
 
+const STUDENT_IMAGE_FALLBACK =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Crect width='160' height='160' rx='34' fill='%23eef6ff'/%3E%3Ccircle cx='80' cy='62' r='28' fill='%23d6e8fb'/%3E%3Cpath d='M34 132c8-28 25-42 46-42s38 14 46 42' fill='%2398b8d8'/%3E%3Ccircle cx='80' cy='58' r='18' fill='%23f1c7a8'/%3E%3C/svg%3E";
+
 const AVATAR_FALLBACKS = [
-  "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&auto=format&fit=crop",
-  "https://images.unsplash.com/photo-1544723795-3fb6469f5b39?w=200&auto=format&fit=crop"
+  STUDENT_IMAGE_FALLBACK,
+  STUDENT_IMAGE_FALLBACK,
+  STUDENT_IMAGE_FALLBACK
 ];
 
 const INITIAL_STUDENTS: Student[] = [
@@ -102,19 +105,9 @@ function studentToRow(student: Student): StoreRow {
   };
 }
 
-function fileToDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error("อ่านไฟล์รูปไม่สำเร็จ"));
-    reader.readAsDataURL(file);
-  });
-}
-
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
   const [form, setForm] = useState<StudentForm>(EMPTY_FORM);
-  const [photoFileName, setPhotoFileName] = useState("");
   const [search, setSearch] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
@@ -158,30 +151,7 @@ export default function StudentsPage() {
 
   function resetForm() {
     setForm(EMPTY_FORM);
-    setPhotoFileName("");
     setEditingId(null);
-  }
-
-  async function handlePhotoUpload(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setMessage("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
-      return;
-    }
-    if (file.size > 1_500_000) {
-      setMessage("รูปใหญ่เกิน 1.5MB กรุณาลดขนาดรูปก่อนอัปโหลด");
-      return;
-    }
-
-    try {
-      const dataUrl = await fileToDataUrl(file);
-      setForm((prev) => ({ ...prev, photoUrl: dataUrl }));
-      setPhotoFileName(file.name);
-      setMessage("");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "อัปโหลดรูปไม่สำเร็จ");
-    }
   }
 
   async function persistStudents(next: Student[], successMessage: string) {
@@ -218,6 +188,10 @@ export default function StudentsPage() {
 
     if (!payload.photoUrl) {
       payload.photoUrl = AVATAR_FALLBACKS[0];
+    } else if (payload.photoUrl.startsWith("data:") && payload.photoUrl.length > 5000) {
+      payload.photoUrl = AVATAR_FALLBACKS[0];
+      setMessage("รูปแบบไฟล์รูปใหญ่เกินสำหรับ Google Sheet ระบบจึงใช้รูปมาตรฐานแทน กรุณาใช้ลิงก์รูปภาพ");
+      return;
     }
 
     if (editingId !== null) {
@@ -245,7 +219,6 @@ export default function StudentsPage() {
       phone: student.phone,
       chronic: student.chronic
     });
-    setPhotoFileName("");
     setMessage("");
   }
 
@@ -267,23 +240,26 @@ export default function StudentsPage() {
 
           <form onSubmit={handleSubmit} className={styles.formGrid}>
             <div>
-              <label className={styles.label} htmlFor="photo-upload">
-                รูปนักศึกษา (อัปโหลด)
+              <label className={styles.label} htmlFor="photo-url">
+                รูปนักศึกษา (ลิงก์รูปภาพ)
               </label>
               <input
-                id="photo-upload"
-                type="file"
-                accept="image/*"
+                id="photo-url"
                 className={styles.input}
-                onChange={(event) => void handlePhotoUpload(event)}
+                value={form.photoUrl}
+                onChange={(event) => setForm((prev) => ({ ...prev, photoUrl: event.target.value }))}
+                placeholder="https://example.com/student.jpg"
               />
-              {photoFileName ? <p className={styles.infoText}>ไฟล์: {photoFileName}</p> : null}
+              <p className={styles.infoText}>ใช้ลิงก์รูปภาพเท่านั้น เพื่อให้บันทึกลง Google Sheet ได้เสถียร</p>
               {form.photoUrl ? (
                 <img
                   src={form.photoUrl}
                   alt="ตัวอย่างรูปนักศึกษา"
                   className={styles.tableAvatar}
                   style={{ width: 64, height: 64, marginTop: 6 }}
+                  onError={(event) => {
+                    event.currentTarget.src = STUDENT_IMAGE_FALLBACK;
+                  }}
                 />
               ) : null}
             </div>
@@ -394,7 +370,14 @@ export default function StudentsPage() {
           <div className={styles.peopleGrid}>
             {filteredStudents.slice(0, 6).map((student) => (
               <article key={student.id} className={styles.personCard}>
-                <img src={student.photoUrl} alt={student.firstName} className={styles.personImage} />
+                <img
+                  src={student.photoUrl}
+                  alt={student.firstName}
+                  className={styles.personImage}
+                  onError={(event) => {
+                    event.currentTarget.src = STUDENT_IMAGE_FALLBACK;
+                  }}
+                />
                 <div>
                   <p className={styles.infoValue}>
                     {student.firstName} {student.lastName}
@@ -440,7 +423,16 @@ export default function StudentsPage() {
                 filteredStudents.map((student) => (
                   <tr key={student.id}>
                     <td>
-                      <img src={student.photoUrl} alt={student.firstName} width={48} height={48} className={styles.tableAvatar} />
+                      <img
+                        src={student.photoUrl}
+                        alt={student.firstName}
+                        width={48}
+                        height={48}
+                        className={styles.tableAvatar}
+                        onError={(event) => {
+                          event.currentTarget.src = STUDENT_IMAGE_FALLBACK;
+                        }}
+                      />
                     </td>
                     <td>{student.studentCode}</td>
                     <td>

@@ -1,6 +1,6 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import styles from "../nurse.module.css";
 import { fetchEntity, saveEntity, StoreRow } from "../lib/storeApi";
 
@@ -18,10 +18,13 @@ type Medicine = {
 
 type MedicineForm = Omit<Medicine, "id">;
 
+const MEDICINE_IMAGE_FALLBACK =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160' viewBox='0 0 160 160'%3E%3Crect width='160' height='160' rx='34' fill='%23fff7e8'/%3E%3Ccircle cx='80' cy='80' r='54' fill='%23f6dfba'/%3E%3Crect x='38' y='70' width='84' height='26' rx='13' fill='%23d9473f' transform='rotate(-32 80 83)'/%3E%3Crect x='76' y='70' width='46' height='26' rx='13' fill='%23f7d889' transform='rotate(-32 99 83)'/%3E%3Cpath d='M80 46v68' stroke='%23fff7e8' stroke-width='5' stroke-linecap='round' transform='rotate(-32 80 80)'/%3E%3C/svg%3E";
+
 const INITIAL_MEDICINES: Medicine[] = [
   {
     id: 1,
-    image: "https://images.unsplash.com/photo-1580281657521-2b3f4f20f4f4?w=200&auto=format&fit=crop",
+    image: MEDICINE_IMAGE_FALLBACK,
     code: "MED-001",
     name: "Paracetamol",
     category: "ยาแก้ปวด",
@@ -32,7 +35,7 @@ const INITIAL_MEDICINES: Medicine[] = [
   },
   {
     id: 2,
-    image: "https://images.unsplash.com/photo-1584362917165-526a968579e8?w=200&auto=format&fit=crop",
+    image: MEDICINE_IMAGE_FALLBACK,
     code: "MED-011",
     name: "ORS",
     category: "เกลือแร่",
@@ -68,7 +71,7 @@ function rowToMedicine(row: StoreRow, index: number): Medicine {
     id: toNumber(row.id, index + 1),
     image:
       toText(row.image_url || row.image) ||
-      "https://images.unsplash.com/photo-1580281657521-2b3f4f20f4f4?w=200&auto=format&fit=crop",
+      MEDICINE_IMAGE_FALLBACK,
     code: toText(row.medicine_code || row.code),
     name: toText(row.name),
     category: toText(row.category),
@@ -97,19 +100,9 @@ function medicineToRow(item: Medicine): StoreRow {
   };
 }
 
-function fileToDataUrl(file: File) {
-  return new Promise<string>((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result || ""));
-    reader.onerror = () => reject(new Error("อ่านไฟล์รูปไม่สำเร็จ"));
-    reader.readAsDataURL(file);
-  });
-}
-
 export default function MedicinesPage() {
   const [medicines, setMedicines] = useState<Medicine[]>([]);
   const [form, setForm] = useState<MedicineForm>(EMPTY_FORM);
-  const [imageFileName, setImageFileName] = useState("");
   const [editingId, setEditingId] = useState<number | null>(null);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -155,30 +148,7 @@ export default function MedicinesPage() {
 
   function resetForm() {
     setForm(EMPTY_FORM);
-    setImageFileName("");
     setEditingId(null);
-  }
-
-  async function handleImageUpload(event: ChangeEvent<HTMLInputElement>) {
-    const file = event.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith("image/")) {
-      setMessage("กรุณาเลือกไฟล์รูปภาพเท่านั้น");
-      return;
-    }
-    if (file.size > 1_500_000) {
-      setMessage("รูปใหญ่เกิน 1.5MB กรุณาลดขนาดรูปก่อนอัปโหลด");
-      return;
-    }
-
-    try {
-      const dataUrl = await fileToDataUrl(file);
-      setForm((prev) => ({ ...prev, image: dataUrl }));
-      setImageFileName(file.name);
-      setMessage("");
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "อัปโหลดรูปไม่สำเร็จ");
-    }
   }
 
   async function persistMedicines(next: Medicine[], successMessage: string) {
@@ -214,7 +184,11 @@ export default function MedicinesPage() {
     }
 
     if (!payload.image) {
-      payload.image = "https://images.unsplash.com/photo-1580281657521-2b3f4f20f4f4?w=200&auto=format&fit=crop";
+      payload.image = MEDICINE_IMAGE_FALLBACK;
+    } else if (payload.image.startsWith("data:") && payload.image.length > 5000) {
+      payload.image = MEDICINE_IMAGE_FALLBACK;
+      setMessage("รูปแบบไฟล์รูปใหญ่เกินสำหรับ Google Sheet ระบบจึงใช้รูปมาตรฐานแทน กรุณาใช้ลิงก์รูปภาพ");
+      return;
     }
 
     if (!payload.unit) payload.unit = "หน่วย";
@@ -235,7 +209,6 @@ export default function MedicinesPage() {
   function startEdit(item: Medicine) {
     setEditingId(item.id);
     setForm({ ...item });
-    setImageFileName("");
     setMessage("");
   }
 
@@ -267,16 +240,25 @@ export default function MedicinesPage() {
           <form onSubmit={submitForm} className={styles.formGrid}>
             <div>
               <label className={styles.label} htmlFor="image">
-                รูปยา (อัปโหลด)
+                รูปยา (ลิงก์รูปภาพ)
               </label>
-              <input id="image" type="file" accept="image/*" className={styles.input} onChange={(event) => void handleImageUpload(event)} />
-              {imageFileName ? <p className={styles.infoText}>ไฟล์: {imageFileName}</p> : null}
+              <input
+                id="image"
+                className={styles.input}
+                value={form.image}
+                onChange={(event) => setForm((prev) => ({ ...prev, image: event.target.value }))}
+                placeholder="https://example.com/medicine.jpg"
+              />
+              <p className={styles.infoText}>ใช้ลิงก์รูปภาพเท่านั้น เพื่อให้บันทึกลง Google Sheet ได้เสถียร</p>
               {form.image ? (
                 <img
                   src={form.image}
                   alt="ตัวอย่างรูปยา"
                   className={styles.tableAvatar}
                   style={{ width: 64, height: 64, marginTop: 6 }}
+                  onError={(event) => {
+                    event.currentTarget.src = MEDICINE_IMAGE_FALLBACK;
+                  }}
                 />
               ) : null}
             </div>
@@ -400,7 +382,16 @@ export default function MedicinesPage() {
                 filtered.map((item) => (
                   <tr key={item.id}>
                     <td>
-                      <img src={item.image} alt={item.name} width={48} height={48} className={styles.tableAvatar} />
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        width={48}
+                        height={48}
+                        className={styles.tableAvatar}
+                        onError={(event) => {
+                          event.currentTarget.src = MEDICINE_IMAGE_FALLBACK;
+                        }}
+                      />
                     </td>
                     <td>{item.code}</td>
                     <td>{item.name}</td>

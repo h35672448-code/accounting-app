@@ -49,9 +49,16 @@
   --shift-bg: rgba(243, 233, 217, 0.72);
   --sidebar-bg: rgba(255, 250, 243, 0.9);
   --sidebar-border: rgba(210, 190, 160, 0.74);
+  --leaf-a: rgba(70, 168, 142, 0.2);
+  --leaf-b: rgba(92, 188, 169, 0.16);
+  --leaf-c: rgba(57, 137, 112, 0.14);
+  --healing-mark: rgba(45, 143, 185, 0.1);
+  --paper-glow: rgba(255, 255, 255, 0.55);
   min-height: 100vh;
   color: var(--text-main);
   background:
+    radial-gradient(ellipse at 8% 78%, rgba(62, 168, 150, 0.13), transparent 32%),
+    radial-gradient(ellipse at 95% 58%, rgba(84, 166, 199, 0.12), transparent 34%),
     radial-gradient(circle at 12% 8%, var(--bg-radial-a), transparent 34%),
     radial-gradient(circle at 90% 16%, var(--bg-radial-b), transparent 30%),
     radial-gradient(circle at 86% 78%, var(--bg-radial-c), transparent 34%),
@@ -59,6 +66,38 @@
   font-family: "Sarabun", "Kanit", "Noto Sans Thai", sans-serif;
   position: relative;
   overflow-x: hidden;
+}
+
+.root::before,
+.root::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.root::before {
+  opacity: 0.72;
+  background:
+    radial-gradient(ellipse 28px 78px at 4% 72%, var(--leaf-a) 0 48%, transparent 50%),
+    radial-gradient(ellipse 22px 64px at 8% 80%, var(--leaf-b) 0 48%, transparent 50%),
+    radial-gradient(ellipse 26px 74px at 14% 88%, var(--leaf-c) 0 48%, transparent 50%),
+    radial-gradient(ellipse 22px 64px at 91% 67%, var(--leaf-a) 0 48%, transparent 50%),
+    radial-gradient(ellipse 28px 82px at 96% 78%, var(--leaf-b) 0 48%, transparent 50%),
+    radial-gradient(ellipse 18px 54px at 88% 87%, var(--leaf-c) 0 48%, transparent 50%);
+  transform-origin: center;
+  animation: natureDrift 18s ease-in-out infinite;
+}
+
+.root::after {
+  opacity: 0.78;
+  background:
+    linear-gradient(var(--healing-mark), var(--healing-mark)) 92% 18% / 70px 14px no-repeat,
+    linear-gradient(var(--healing-mark), var(--healing-mark)) 92% 18% / 14px 70px no-repeat,
+    linear-gradient(135deg, var(--paper-glow), rgba(219, 240, 247, 0.14)) 84% 72% / 170px 116px no-repeat,
+    repeating-linear-gradient(180deg, rgba(80, 122, 150, 0.09) 0 2px, transparent 2px 18px) 86% 75% / 120px 72px no-repeat,
+    linear-gradient(135deg, rgba(255, 255, 255, 0), rgba(255, 250, 236, 0.28) 48%, rgba(255, 255, 255, 0)) 0 0 / 100% 100% no-repeat;
 }
 
 .themeWarm {
@@ -116,6 +155,11 @@
   --shift-bg: #f3f3f3;
   --sidebar-bg: rgba(252, 252, 252, 0.95);
   --sidebar-border: #d6d6d6;
+  --leaf-a: rgba(90, 90, 90, 0.12);
+  --leaf-b: rgba(120, 120, 120, 0.1);
+  --leaf-c: rgba(70, 70, 70, 0.08);
+  --healing-mark: rgba(35, 35, 35, 0.08);
+  --paper-glow: rgba(255, 255, 255, 0.48);
 }
 
 .backdrop {
@@ -123,6 +167,11 @@
   inset: 0;
   pointer-events: none;
   z-index: 0;
+  background:
+    radial-gradient(ellipse 24px 70px at 5% 52%, rgba(82, 178, 158, 0.16) 0 45%, transparent 47%),
+    radial-gradient(ellipse 18px 56px at 9% 57%, rgba(89, 190, 178, 0.14) 0 45%, transparent 47%),
+    radial-gradient(ellipse 26px 76px at 95% 52%, rgba(57, 153, 169, 0.13) 0 45%, transparent 47%),
+    radial-gradient(ellipse 18px 58px at 91% 58%, rgba(94, 185, 147, 0.12) 0 45%, transparent 47%);
 }
 
 .backdrop::before,
@@ -1399,6 +1448,10 @@
   overflow: hidden;
   border: 1px solid rgba(178, 212, 232, 0.72);
   background:
+    radial-gradient(ellipse 38px 112px at 97% 78%, rgba(47, 164, 153, 0.15) 0 46%, transparent 48%),
+    radial-gradient(ellipse 32px 92px at 92% 88%, rgba(91, 190, 165, 0.13) 0 46%, transparent 48%),
+    linear-gradient(rgba(45, 143, 185, 0.08), rgba(45, 143, 185, 0.08)) 96% 14% / 60px 12px no-repeat,
+    linear-gradient(rgba(45, 143, 185, 0.08), rgba(45, 143, 185, 0.08)) 96% 14% / 12px 60px no-repeat,
     radial-gradient(circle at 8% 92%, rgba(73, 184, 180, 0.2), transparent 24%),
     radial-gradient(circle at 98% 10%, rgba(80, 151, 217, 0.18), transparent 28%),
     linear-gradient(135deg, rgba(229, 245, 255, 0.96), rgba(247, 252, 255, 0.9) 48%, rgba(227, 246, 238, 0.9));
@@ -2214,5 +2267,16 @@
 
   50% {
     transform: translateY(-12px);
+  }
+}
+
+@keyframes natureDrift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+  }
+
+  50% {
+    transform: translate3d(0, 10px, 0) rotate(-1deg);
   }
 }

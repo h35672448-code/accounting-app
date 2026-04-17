@@ -12,15 +12,7 @@ type NewsItem = {
   date: string;
 };
 
-const INITIAL_NEWS: NewsItem[] = [
-  {
-    id: 1,
-    title: "เปิดบริการวัคซีนไข้หวัดใหญ่",
-    detail: "นักศึกษาลงทะเบียนได้ที่ห้องพยาบาล วันที่ 18-20 มีนาคม",
-    image: "https://images.unsplash.com/photo-1584483766114-2cea6facdf57?w=300&auto=format&fit=crop",
-    date: "11/03/2026"
-  }
-];
+const NEWS_FALLBACK_IMAGE = "/logo.png";
 
 function toNumber(value: unknown, fallback = 0) {
   const parsed = Number(value);
@@ -31,9 +23,17 @@ function toText(value: unknown) {
   return String(value ?? "").trim();
 }
 
+function toDateInputValue(value: unknown) {
+  const raw = toText(value);
+  if (!raw) return new Date().toISOString().slice(0, 10);
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return raw;
+  return date.toISOString().slice(0, 10);
+}
+
 function formatThaiDate(value: string) {
   const date = new Date(value);
-  if (Number.isNaN(date.getTime())) return new Date().toLocaleDateString("th-TH");
+  if (Number.isNaN(date.getTime())) return value || "-";
   return date.toLocaleDateString("th-TH");
 }
 
@@ -42,24 +42,24 @@ function rowToNews(row: StoreRow, index: number): NewsItem {
     id: toNumber(row.id, index + 1),
     title: toText(row.title),
     detail: toText(row.detail),
-    image:
-      toText(row.image_url || row.image) ||
-      "https://images.unsplash.com/photo-1584483766114-2cea6facdf57?w=300&auto=format&fit=crop",
-    date: formatThaiDate(toText(row.published_at || row.date))
+    image: toText(row.image_url || row.image) || NEWS_FALLBACK_IMAGE,
+    date: toDateInputValue(row.published_at || row.date)
   };
 }
 
 function newsToRow(item: NewsItem): StoreRow {
   const now = new Date().toISOString();
+  const publishedAt = item.date ? new Date(`${item.date}T00:00:00`).toISOString() : now;
   return {
     id: item.id,
     title: item.title,
     detail: item.detail,
     image_url: item.image,
-    published_at: now,
+    published_at: publishedAt,
+    date: item.date,
     author_id: 1,
     updated_at: now,
-    created_at: now
+    created_at: publishedAt
   };
 }
 
@@ -68,6 +68,7 @@ export default function NewsPage() {
   const [title, setTitle] = useState("");
   const [detail, setDetail] = useState("");
   const [image, setImage] = useState("");
+  const [date, setDate] = useState(() => new Date().toISOString().slice(0, 10));
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -80,20 +81,12 @@ export default function NewsPage() {
     try {
       setLoading(true);
       const rows = await fetchEntity("news");
-      if (rows.length === 0) {
-        setNews(INITIAL_NEWS);
-        await saveEntity(
-          "news",
-          INITIAL_NEWS.map(newsToRow)
-        );
-      } else {
-        const mapped = rows.map((row, index) => rowToNews(row, index));
-        mapped.sort((a, b) => b.id - a.id);
-        setNews(mapped);
-      }
+      const mapped = rows.map((row, index) => rowToNews(row, index));
+      mapped.sort((a, b) => b.id - a.id);
+      setNews(mapped);
       setMessage("");
     } catch (error) {
-      setNews(INITIAL_NEWS);
+      setNews([]);
       setMessage(error instanceof Error ? `โหลดข่าวไม่สำเร็จ: ${error.message}` : "โหลดข่าวไม่สำเร็จ");
     } finally {
       setLoading(false);
@@ -104,6 +97,7 @@ export default function NewsPage() {
     setTitle("");
     setDetail("");
     setImage("");
+    setDate(new Date().toISOString().slice(0, 10));
     setEditingId(null);
   }
 
@@ -131,23 +125,24 @@ export default function NewsPage() {
     const payload = {
       title: title.trim(),
       detail: detail.trim(),
-      image: image.trim() || "https://images.unsplash.com/photo-1584483766114-2cea6facdf57?w=300&auto=format&fit=crop"
+      image: image.trim() || NEWS_FALLBACK_IMAGE,
+      date
     };
 
-    if (!payload.title || !payload.detail) {
-      setMessage("กรอกหัวข้อและรายละเอียดให้ครบ");
+    if (!payload.title || !payload.detail || !payload.date) {
+      setMessage("กรอกหัวข้อ รายละเอียด และวันที่ให้ครบ");
       return;
     }
 
     if (editingId !== null) {
-      const next = news.map((item) => (item.id === editingId ? { ...item, ...payload, date: new Date().toLocaleDateString("th-TH") } : item));
+      const next = news.map((item) => (item.id === editingId ? { ...item, ...payload } : item));
       resetForm();
       await persistNews(next, "แก้ไขข่าวเรียบร้อย");
       return;
     }
 
     const nextId = news.length ? Math.max(...news.map((item) => item.id)) + 1 : 1;
-    const next = [{ id: nextId, ...payload, date: new Date().toLocaleDateString("th-TH") }, ...news];
+    const next = [{ id: nextId, ...payload }, ...news];
     resetForm();
     await persistNews(next, "เพิ่มข่าวเรียบร้อย");
   }
@@ -157,6 +152,7 @@ export default function NewsPage() {
     setTitle(item.title);
     setDetail(item.detail);
     setImage(item.image);
+    setDate(toDateInputValue(item.date));
     setMessage("");
   }
 
@@ -180,6 +176,10 @@ export default function NewsPage() {
             <div>
               <label className={styles.label}>หัวข้อ</label>
               <input className={styles.input} value={title} onChange={(event) => setTitle(event.target.value)} />
+            </div>
+            <div>
+              <label className={styles.label}>วันที่</label>
+              <input className={styles.input} type="date" value={date} onChange={(event) => setDate(event.target.value)} />
             </div>
             <div>
               <label className={styles.label}>รายละเอียด</label>
@@ -231,7 +231,7 @@ export default function NewsPage() {
                   <div>
                     <p className={styles.infoValue}>{item.title}</p>
                     <p className={styles.cardText}>{item.detail}</p>
-                    <p className={styles.infoText}>วันที่ {item.date}</p>
+                    <p className={styles.infoText}>วันที่ {formatThaiDate(item.date)}</p>
                   </div>
                   <div className={styles.inlineActions}>
                     <button className={`${styles.button} ${styles.btnSoft}`}>👁 ดูข่าว</button>

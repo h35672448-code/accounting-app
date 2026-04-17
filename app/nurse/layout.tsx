@@ -66,7 +66,7 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [mode, setMode] = useState<ThemeMode>("warm");
   const [language, setLanguage] = useState<UiLang>("th");
-  const [isAdminView, setIsAdminView] = useState(false);
+  const [currentRole, setCurrentRole] = useState<"admin" | "user" | "guest">("guest");
   const [now, setNow] = useState(() => new Date());
   const [newsList, setNewsList] = useState<NewsBanner[]>([]);
   const [newsIndex, setNewsIndex] = useState(0);
@@ -94,7 +94,7 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     function syncRoleFromStorage() {
       const role = getCurrentRole();
-      setIsAdminView(role === "admin");
+      setCurrentRole(role);
     }
 
     syncRoleFromStorage();
@@ -209,7 +209,19 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
               </p>
               <p className={styles.timeShift}>👩‍⚕️ {shiftByHour(now.getHours(), language)}</p>
             </div>
-            <div className={styles.userChip}>{isAdminView ? (language === "th" ? "👤 ผู้ดูแล" : "👤 Admin") : language === "th" ? "👤 ผู้ใช้" : "👤 User"}</div>
+            <div className={styles.userChip}>
+              {currentRole === "admin"
+                ? language === "th"
+                  ? "👤 ผู้ดูแล"
+                  : "👤 Admin"
+                : currentRole === "user"
+                  ? language === "th"
+                    ? "👤 ผู้ใช้"
+                    : "👤 Staff"
+                  : language === "th"
+                    ? "👤 ผู้ชม"
+                    : "👤 Viewer"}
+            </div>
           </div>
         </header>
 
@@ -260,24 +272,30 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
         >
           🌐
         </button>
-        {isAdminView ? (
+        {currentRole === "admin" ? (
           <Link href="/nurse/users" className={styles.iconDockLink} title={language === "th" ? "เพิ่มผู้ใช้" : "Add Users"}>
             👥
           </Link>
         ) : null}
-        <button
-          type="button"
-          className={styles.iconDockButton}
-          onClick={() => {
-            window.localStorage.removeItem(NURSE_SESSION_STORAGE_KEY);
-            setIsAdminView(false);
-            window.location.assign("/nurse/login");
-          }}
-          aria-label={language === "th" ? "ออกจากระบบ" : "Logout"}
-          title={language === "th" ? "ออกจากระบบ" : "Logout"}
-        >
-          🚪
-        </button>
+        {currentRole !== "guest" ? (
+          <button
+            type="button"
+            className={styles.iconDockButton}
+            onClick={() => {
+              window.localStorage.removeItem(NURSE_SESSION_STORAGE_KEY);
+              setCurrentRole("guest");
+              window.location.assign("/nurse/login");
+            }}
+            aria-label={language === "th" ? "ออกจากระบบ" : "Logout"}
+            title={language === "th" ? "ออกจากระบบ" : "Logout"}
+          >
+            🚪
+          </button>
+        ) : (
+          <Link href="/nurse/login" className={styles.iconDockLink} title={language === "th" ? "เข้าสู่ระบบ" : "Login"}>
+            🔐
+          </Link>
+        )}
       </div>
     </div>
   );

@@ -1,8 +1,9 @@
 "use client";
 
+import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import styles from "../nurse.module.css";
-import { fetchEntity, saveEntity, StoreRow } from "../lib/storeApi";
+import { canWriteEntity, fetchEntity, saveEntity, StoreRow } from "../lib/storeApi";
 
 type NewsItem = {
   id: number;
@@ -72,9 +73,21 @@ export default function NewsPage() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [canManageNews, setCanManageNews] = useState(false);
 
   useEffect(() => {
     void loadNews();
+  }, []);
+
+  useEffect(() => {
+    const syncAccess = () => setCanManageNews(canWriteEntity("news"));
+    syncAccess();
+    window.addEventListener("storage", syncAccess);
+    window.addEventListener("focus", syncAccess);
+    return () => {
+      window.removeEventListener("storage", syncAccess);
+      window.removeEventListener("focus", syncAccess);
+    };
   }, []);
 
   async function loadNews() {
@@ -117,6 +130,11 @@ export default function NewsPage() {
   async function submitNews(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
+    if (!canManageNews) {
+      setMessage("กรุณาเข้าสู่ระบบผู้ดูแลหรือผู้ใช้ก่อนบันทึกข่าว");
+      return;
+    }
+
     if (image.trim().startsWith("data:")) {
       setMessage("กรุณาใช้ลิงก์รูปภาพแบบปกติเท่านั้น ระบบนี้ยังไม่รองรับการอัปโหลดไฟล์รูปเข้า Google Sheet");
       return;
@@ -148,6 +166,11 @@ export default function NewsPage() {
   }
 
   function startEdit(item: NewsItem) {
+    if (!canManageNews) {
+      setMessage("กรุณาเข้าสู่ระบบผู้ดูแลหรือผู้ใช้ก่อนแก้ไขข่าว");
+      return;
+    }
+
     setEditingId(item.id);
     setTitle(item.title);
     setDetail(item.detail);
@@ -157,6 +180,11 @@ export default function NewsPage() {
   }
 
   async function removeNews(id: number) {
+    if (!canManageNews) {
+      setMessage("กรุณาเข้าสู่ระบบผู้ดูแลหรือผู้ใช้ก่อนลบข่าว");
+      return;
+    }
+
     const next = news.filter((item) => item.id !== id);
     if (editingId === id) resetForm();
     await persistNews(next, "ลบข่าวเรียบร้อย");
@@ -172,46 +200,57 @@ export default function NewsPage() {
             <h3 className={styles.sectionTitle}>{editingId ? "แก้ไขข่าว" : "เพิ่มข่าว"}</h3>
           </div>
 
-          <form onSubmit={submitNews} className={styles.miniGrid}>
-            <div>
-              <label className={styles.label}>หัวข้อ</label>
-              <input className={styles.input} value={title} onChange={(event) => setTitle(event.target.value)} />
-            </div>
-            <div>
-              <label className={styles.label}>วันที่</label>
-              <input className={styles.input} type="date" value={date} onChange={(event) => setDate(event.target.value)} />
-            </div>
-            <div>
-              <label className={styles.label}>รายละเอียด</label>
-              <textarea className={styles.textarea} value={detail} onChange={(event) => setDetail(event.target.value)} />
-            </div>
-            <div>
-              <label className={styles.label}>ลิงก์รูปภาพ</label>
-              <input
-                className={styles.input}
-                value={image}
-                onChange={(event) => setImage(event.target.value)}
-                placeholder="https://example.com/news.jpg"
-              />
-              <p className={styles.infoText}>ใช้ลิงก์รูปภาพปกติ เช่น จาก Google Drive แบบลิงก์ตรง หรือเว็บฝากรูป</p>
-              {image ? (
-                <img
-                  src={image}
-                  alt="ตัวอย่างรูปข่าว"
-                  className={styles.tableAvatar}
-                  style={{ width: 84, height: 54, marginTop: 6 }}
+          {canManageNews ? (
+            <form onSubmit={submitNews} className={styles.miniGrid}>
+              <div>
+                <label className={styles.label}>หัวข้อ</label>
+                <input className={styles.input} value={title} onChange={(event) => setTitle(event.target.value)} />
+              </div>
+              <div>
+                <label className={styles.label}>วันที่</label>
+                <input className={styles.input} type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+              </div>
+              <div>
+                <label className={styles.label}>รายละเอียด</label>
+                <textarea className={styles.textarea} value={detail} onChange={(event) => setDetail(event.target.value)} />
+              </div>
+              <div>
+                <label className={styles.label}>ลิงก์รูปภาพ</label>
+                <input
+                  className={styles.input}
+                  value={image}
+                  onChange={(event) => setImage(event.target.value)}
+                  placeholder="https://example.com/news.jpg"
                 />
-              ) : null}
+                <p className={styles.infoText}>ใช้ลิงก์รูปภาพปกติ เช่น จาก Google Drive แบบลิงก์ตรง หรือเว็บฝากรูป</p>
+                {image ? (
+                  <img
+                    src={image}
+                    alt="ตัวอย่างรูปข่าว"
+                    className={styles.tableAvatar}
+                    style={{ width: 84, height: 54, marginTop: 6 }}
+                  />
+                ) : null}
+              </div>
+              <div className={styles.toolbar}>
+                <button className={`${styles.button} ${styles.btnPrimary}`} type="submit">
+                  ➕ {editingId ? "บันทึกแก้ไข" : "เพิ่มข่าว"}
+                </button>
+                <button className={`${styles.button} ${styles.btnGhost}`} type="button" onClick={resetForm}>
+                  ล้างฟอร์ม
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className={styles.alertBox}>
+              คนทั่วไปดูข่าวได้เท่านั้น หากต้องการเพิ่ม แก้ไข หรือลบข่าว กรุณาเข้าสู่ระบบด้วยรหัสพนักงาน
+              <div className={styles.toolbar} style={{ marginTop: 10 }}>
+                <Link href="/nurse/login" className={`${styles.button} ${styles.btnPrimary}`}>
+                  🔐 เข้าสู่ระบบ
+                </Link>
+              </div>
             </div>
-            <div className={styles.toolbar}>
-              <button className={`${styles.button} ${styles.btnPrimary}`} type="submit">
-                ➕ {editingId ? "บันทึกแก้ไข" : "เพิ่มข่าว"}
-              </button>
-              <button className={`${styles.button} ${styles.btnGhost}`} type="button" onClick={resetForm}>
-                ล้างฟอร์ม
-              </button>
-            </div>
-          </form>
+          )}
         </article>
 
         <article className={styles.panel}>
@@ -235,12 +274,16 @@ export default function NewsPage() {
                   </div>
                   <div className={styles.inlineActions}>
                     <button className={`${styles.button} ${styles.btnSoft}`}>👁 ดูข่าว</button>
-                    <button className={`${styles.button} ${styles.btnWarning}`} onClick={() => startEdit(item)}>
-                      ✏ แก้ไข
-                    </button>
-                    <button className={`${styles.button} ${styles.btnDanger}`} onClick={() => removeNews(item.id)}>
-                      ❌ ลบ
-                    </button>
+                    {canManageNews ? (
+                      <>
+                        <button className={`${styles.button} ${styles.btnWarning}`} onClick={() => startEdit(item)}>
+                          ✏ แก้ไข
+                        </button>
+                        <button className={`${styles.button} ${styles.btnDanger}`} onClick={() => removeNews(item.id)}>
+                          ❌ ลบ
+                        </button>
+                      </>
+                    ) : null}
                   </div>
                 </article>
               ))

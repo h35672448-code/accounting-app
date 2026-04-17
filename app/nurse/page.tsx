@@ -6,6 +6,23 @@ import { getCurrentRole } from "./lib/auth";
 import { NURSE_SHIFT_EVENT, type ShiftRecord, loadShiftSchedule } from "./lib/shiftSchedule";
 import styles from "./nurse.module.css";
 
+const publicActions = [
+  {
+    href: "/nurse/news",
+    icon: "📰",
+    title: "ข่าว",
+    text: "",
+    iconClass: styles.iconBlue
+  },
+  {
+    href: "#today-shift",
+    icon: "👩‍⚕️",
+    title: "เวรวันนี้",
+    text: "",
+    iconClass: styles.iconGreen
+  }
+];
+
 const primaryActions = [
   {
     href: "/nurse/dashboard#today-shift",
@@ -40,14 +57,17 @@ const focusTools = [
 const utilityActions = {
   admin: [
     { href: "/nurse/dashboard", icon: "📊", title: "Dashboard" },
+    { href: "/nurse/users", icon: "👥", title: "ผู้ใช้" },
+    { href: "/nurse/news", icon: "📰", title: "ข่าว" },
+    { href: "/nurse/review", icon: "💬", title: "ประเมิน" },
+    { href: "/nurse/video", icon: "📹", title: "วิดีโอคอล" }
+  ],
+  user: [
     { href: "/nurse/news", icon: "📰", title: "ข่าว" },
     { href: "/nurse/review", icon: "💬", title: "ประเมิน" },
     { href: "/nurse/video", icon: "📹", title: "วิดีโอคอล" }
   ],
   guest: [
-    { href: "/nurse/news", icon: "📰", title: "ข่าว" },
-    { href: "/nurse/review", icon: "💬", title: "ประเมิน" },
-    { href: "/nurse/video", icon: "📹", title: "วิดีโอคอล" },
     { href: "/nurse/login", icon: "🔐", title: "Login" }
   ]
 };
@@ -73,12 +93,14 @@ export default function NurseHomePage() {
     };
   }, []);
 
-  const secondaryActions = role === "admin" ? utilityActions.admin : utilityActions.guest;
+  const isGuest = role === "guest";
+  const visiblePrimaryActions = isGuest ? publicActions : primaryActions;
+  const secondaryActions = role === "admin" ? utilityActions.admin : role === "user" ? utilityActions.user : utilityActions.guest;
 
   return (
     <>
       <section className={styles.cardGrid}>
-        {primaryActions.map((card) => (
+        {visiblePrimaryActions.map((card) => (
           <Link key={card.title} href={card.href} className={`${styles.menuCard} ${styles.menuCardCompact}`}>
             <span className={`${styles.cardIcon} ${card.iconClass}`}>{card.icon}</span>
             <h3 className={styles.cardTitle}>{card.title}</h3>
@@ -91,7 +113,7 @@ export default function NurseHomePage() {
         <article className={styles.panel}>
           <div>
             <h3 className={styles.sectionTitle}>ข่าวห้องพยาบาล</h3>
-            <p className={styles.sectionSub}>ประกาศล่าสุดจะแสดงด้านบนอัตโนมัติ และจัดการได้ที่หน้า ข่าว</p>
+            <p className={styles.sectionSub}>{isGuest ? "ติดตามประกาศล่าสุดจากห้องพยาบาล" : "ประกาศล่าสุดจะแสดงด้านบนอัตโนมัติ และจัดการได้ที่หน้า ข่าว"}</p>
           </div>
           <Link href="/nurse/news" className={`${styles.button} ${styles.btnPrimary}`}>
             📰 ดูข่าวทั้งหมด
@@ -116,22 +138,26 @@ export default function NurseHomePage() {
             <Link href="/nurse/dashboard#today-shift-editor" className={`${styles.button} ${styles.btnSoft}`}>
               ✏️ แก้ไขเวร
             </Link>
-          ) : (
+          ) : isGuest ? (
             <Link href="/nurse/login" className={`${styles.button} ${styles.btnSoft}`}>
-              🔐 เข้าสู่ระบบเพื่อแก้เวร
+              🔐 เข้าสู่ระบบพนักงาน
             </Link>
+          ) : (
+            <p className={styles.infoText}>ผู้ใช้ดูเวรได้ หากต้องการแก้ไขให้ใช้บัญชีผู้ดูแล</p>
           )}
         </article>
       </section>
 
-      <section className={styles.secondaryMenuRow} aria-label="เมนูข้อมูลหลัก">
-        {focusTools.map((item) => (
-          <Link key={item.href} href={item.href} className={styles.secondaryMenuLink}>
-            <span className={styles.secondaryMenuIcon}>{item.icon}</span>
-            <span>{item.title}</span>
-          </Link>
-        ))}
-      </section>
+      {!isGuest ? (
+        <section className={styles.secondaryMenuRow} aria-label="เมนูข้อมูลหลัก">
+          {focusTools.map((item) => (
+            <Link key={item.href} href={item.href} className={styles.secondaryMenuLink}>
+              <span className={styles.secondaryMenuIcon}>{item.icon}</span>
+              <span>{item.title}</span>
+            </Link>
+          ))}
+        </section>
+      ) : null}
 
       <section className={styles.toolShelf} aria-label="เมนูเพิ่มเติม">
         <div className={styles.toolShelfHead}>

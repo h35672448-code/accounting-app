@@ -357,8 +357,8 @@ export default function DashboardPage() {
           <div className={styles.dashboardBrandLine}>
             <img src="/logo.png" alt="ระบบห้องพยาบาล" className={styles.dashboardBrandLogo} />
             <div>
-              <p className={styles.dashboardEyebrow}>NURSE ROOM</p>
-              <h2 className={styles.dashboardTitle}>ศูนย์ดูแลสุขภาพนักศึกษา</h2>
+              <p className={styles.dashboardEyebrow}>NURSE ROOM MANAGEMENT</p>
+              <h2 className={styles.dashboardTitle}>ระบบห้องพยาบาล</h2>
             </div>
           </div>
           <label className={styles.dashboardSearch}>
@@ -368,8 +368,8 @@ export default function DashboardPage() {
           <div className={styles.dashboardProfileCard}>
             <span className={styles.dashboardAvatar}>👩‍⚕️</span>
             <div>
-              <b>Admin</b>
-              <small>ผู้ดูแลระบบ</small>
+              <b>ผู้ดูแล</b>
+              <small>ระบบห้องพยาบาล</small>
             </div>
           </div>
         </header>

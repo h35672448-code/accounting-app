@@ -5,22 +5,16 @@ import { useRouter } from "next/navigation";
 import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import styles from "../nurse.module.css";
 import { getCurrentSession } from "../lib/auth";
+import { fetchEntity, type StoreRow } from "../lib/storeApi";
 import { type ShiftRecord, getDefaultShifts, loadShiftSchedule, saveShiftSchedule } from "../lib/shiftSchedule";
 
 const adminSidebar = [
-  { href: "#overview", icon: "🏥", label: "Dashboard" },
+  { href: "#overview", icon: "🏥", label: "หน้าควบคุม" },
   { href: "/nurse/students", icon: "🎓", label: "นักศึกษา" },
   { href: "/nurse/treatment", icon: "🧾", label: "การรักษา" },
   { href: "/nurse/medicines", icon: "💊", label: "คลังยา" },
   { href: "/nurse/news", icon: "📰", label: "ข่าว" },
   { href: "#reports", icon: "📊", label: "รายงาน" }
-];
-
-const statCards = [
-  { label: "ผู้ป่วยวันนี้", value: "42", icon: "🧑‍⚕️", tone: "blue" },
-  { label: "รอรักษา", value: "9", icon: "📋", tone: "amber" },
-  { label: "ยาพร้อมใช้", value: "96", icon: "💊", tone: "green" },
-  { label: "รายงานรอตรวจ", value: "2", icon: "📈", tone: "sky" }
 ];
 
 const quickActions = [
@@ -30,22 +24,24 @@ const quickActions = [
   { href: "/nurse/video", icon: "📹", label: "วิดีโอคอล" }
 ];
 
-const recentRecords = [
-  { name: "สมชาย มูลใจ", age: "45", date: "24/04/2026", status: "กำลังรักษา", badge: "warning" },
-  { name: "วิภา ศรีสุข", age: "32", date: "24/04/2026", status: "หายแล้ว", badge: "success" },
-  { name: "วรรณา เลิศสุข", age: "28", date: "23/04/2026", status: "ติดตามผล", badge: "info" }
-];
-
-const healthBars = [
-  { day: "จ", visits: 54, treatment: 28, recovered: 42 },
-  { day: "อ", visits: 76, treatment: 46, recovered: 54 },
-  { day: "พ", visits: 74, treatment: 52, recovered: 68 },
-  { day: "พฤ", visits: 68, treatment: 80, recovered: 76 },
-  { day: "ศ", visits: 74, treatment: 62, recovered: 86 },
-  { day: "ส", visits: 90, treatment: 0, recovered: 82 }
-];
-
 type ReportKey = "daily" | "monthly" | "students" | "medicine";
+type BadgeTone = "warning" | "success" | "info";
+
+type DashboardRows = {
+  visits: StoreRow[];
+  students: StoreRow[];
+  medicines: StoreRow[];
+  visitMedicines: StoreRow[];
+  feedback: StoreRow[];
+};
+
+const EMPTY_ROWS: DashboardRows = {
+  visits: [],
+  students: [],
+  medicines: [],
+  visitMedicines: [],
+  feedback: []
+};
 
 const reportOptions: Array<{ value: ReportKey; label: string }> = [
   { value: "daily", label: "รายงานรายวัน" },
@@ -54,50 +50,110 @@ const reportOptions: Array<{ value: ReportKey; label: string }> = [
   { value: "medicine", label: "รายงานการใช้ยา" }
 ];
 
-const reportSummaries: Record<
-  ReportKey,
-  { title: string; description: string; metrics: Array<{ label: string; value: string }> }
-> = {
-  daily: {
-    title: "รายงานรายวัน",
-    description: "สรุปผู้เข้ารับบริการ คิวรอ และเคสที่ต้องติดตามในวันนี้",
-    metrics: [
-      { label: "ผู้เข้ารับบริการ", value: "42 คน" },
-      { label: "คิวที่ปิดแล้ว", value: "33 คิว" },
-      { label: "เคสส่งต่อ", value: "2 เคส" }
-    ]
-  },
-  monthly: {
-    title: "รายงานรายเดือน",
-    description: "ดูแนวโน้มจำนวนผู้ป่วย อาการที่พบบ่อย และภาระงานประจำเดือน",
-    metrics: [
-      { label: "จำนวนผู้ป่วยรวม", value: "684 คน" },
-      { label: "อาการพบบ่อย", value: "ปวดศีรษะ" },
-      { label: "วันใช้งานสูงสุด", value: "วันจันทร์" }
-    ]
-  },
-  students: {
-    title: "รายงานนักศึกษา",
-    description: "สรุปนักศึกษาที่เข้ารับบริการบ่อยและกลุ่มที่ควรติดตามต่อเนื่อง",
-    metrics: [
-      { label: "มีประวัติรักษา", value: "215 คน" },
-      { label: "ต้องติดตามต่อ", value: "18 คน" },
-      { label: "กลุ่มแพ้ยา", value: "7 คน" }
-    ]
-  },
-  medicine: {
-    title: "รายงานการใช้ยา",
-    description: "สรุปการเบิกใช้ยา เพื่อช่วยตรวจคลังยาและวางแผนเติมสต็อก",
-    metrics: [
-      { label: "ยาที่ใช้มากสุด", value: "Paracetamol" },
-      { label: "จำนวนเบิกวันนี้", value: "96 เม็ด" },
-      { label: "ยาใกล้หมด", value: "5 รายการ" }
-    ]
-  }
-};
-
 function currentShift(shifts: ShiftRecord[]) {
   return shifts[0] || getDefaultShifts()[0];
+}
+
+function toText(value: unknown) {
+  return String(value ?? "").trim();
+}
+
+function toNumber(value: unknown, fallback = 0) {
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function parseDate(value: unknown) {
+  const raw = toText(value);
+  if (!raw) return null;
+  const date = new Date(raw);
+  return Number.isNaN(date.getTime()) ? null : date;
+}
+
+function dateFromRow(row: StoreRow) {
+  return parseDate(row.visit_at || row.date || row.created_at || row.updated_at || row.published_at);
+}
+
+function isSameDay(date: Date | null, target: Date) {
+  if (!date) return false;
+  return date.getFullYear() === target.getFullYear() && date.getMonth() === target.getMonth() && date.getDate() === target.getDate();
+}
+
+function isSameMonth(date: Date | null, target: Date) {
+  if (!date) return false;
+  return date.getFullYear() === target.getFullYear() && date.getMonth() === target.getMonth();
+}
+
+function formatDate(value: Date | null) {
+  if (!value) return "-";
+  return value.toLocaleDateString("th-TH", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
+
+function studentName(row?: StoreRow) {
+  if (!row) return "-";
+  return toText(row.student_name) || `${toText(row.first_name)} ${toText(row.last_name)}`.trim() || "-";
+}
+
+function visitStatus(row: StoreRow) {
+  return toText(row.triage_status || row.status) || (toText(row.severity) === "หนัก" ? "ส่งโรงพยาบาล" : "รอตรวจ");
+}
+
+function isPendingVisit(row: StoreRow) {
+  const status = visitStatus(row);
+  if (/เสร็จ|หาย|ยกเลิก/.test(status)) return false;
+  return /รอ|กำลัง|ตรวจ|คัดกรอง|ส่ง/.test(status);
+}
+
+function isSevereVisit(row: StoreRow) {
+  const data = `${toText(row.severity)} ${visitStatus(row)}`;
+  return /หนัก|ส่งโรงพยาบาล|ฉุกเฉิน/.test(data);
+}
+
+function badgeForStatus(status: string): BadgeTone {
+  if (/เสร็จ|หาย|ตรวจแล้ว/.test(status)) return "success";
+  if (/ส่ง|หนัก|ฉุกเฉิน/.test(status)) return "warning";
+  return "info";
+}
+
+function stockQty(row: StoreRow) {
+  return toNumber(row.stock_qty ?? row.quantity, 0);
+}
+
+function reorderLevel(row: StoreRow) {
+  return toNumber(row.reorder_level, 10);
+}
+
+function categoryName(row: StoreRow) {
+  return toText(row.category) || "เวชภัณฑ์";
+}
+
+function buildDayBars(visits: StoreRow[]) {
+  const today = new Date();
+  const days = Array.from({ length: 6 }, (_, index) => {
+    const date = new Date(today);
+    date.setDate(today.getDate() - (5 - index));
+    return date;
+  });
+
+  const raw = days.map((date) => {
+    const dayVisits = visits.filter((row) => isSameDay(dateFromRow(row), date));
+    const treated = dayVisits.filter((row) => /เสร็จ|หาย|ตรวจแล้ว/.test(visitStatus(row))).length;
+    const pending = dayVisits.filter(isPendingVisit).length;
+    return {
+      day: date.toLocaleDateString("th-TH", { weekday: "short" }).replace("วัน", ""),
+      visits: dayVisits.length,
+      treatment: pending,
+      recovered: treated
+    };
+  });
+
+  const max = Math.max(1, ...raw.flatMap((item) => [item.visits, item.treatment, item.recovered]));
+  return raw.map((item) => ({
+    ...item,
+    visitsHeight: item.visits > 0 ? Math.max(8, Math.round((item.visits / max) * 100)) : 4,
+    treatmentHeight: item.treatment > 0 ? Math.max(8, Math.round((item.treatment / max) * 100)) : 4,
+    recoveredHeight: item.recovered > 0 ? Math.max(8, Math.round((item.recovered / max) * 100)) : 4
+  }));
 }
 
 export default function DashboardPage() {
@@ -106,6 +162,8 @@ export default function DashboardPage() {
   const [message, setMessage] = useState("");
   const [isAdmin, setIsAdmin] = useState(false);
   const [authReady, setAuthReady] = useState(false);
+  const [rows, setRows] = useState<DashboardRows>(EMPTY_ROWS);
+  const [dataMessage, setDataMessage] = useState("");
   const [selectedReport, setSelectedReport] = useState<ReportKey>("daily");
 
   useEffect(() => {
@@ -120,9 +178,142 @@ export default function DashboardPage() {
     setAuthReady(true);
   }, [router]);
 
+  useEffect(() => {
+    if (!authReady) return;
+
+    async function loadDashboardRows() {
+      try {
+        const [visits, students, medicines, visitMedicines, feedback] = await Promise.all([
+          fetchEntity("visits"),
+          fetchEntity("students"),
+          fetchEntity("medicines"),
+          fetchEntity("visit_medicines"),
+          fetchEntity("feedback")
+        ]);
+        setRows({ visits, students, medicines, visitMedicines, feedback });
+        setDataMessage("");
+      } catch (error) {
+        setRows(EMPTY_ROWS);
+        setDataMessage(error instanceof Error ? `โหลดข้อมูล Dashboard ไม่สำเร็จ: ${error.message}` : "โหลดข้อมูล Dashboard ไม่สำเร็จ");
+      }
+    }
+
+    void loadDashboardRows();
+  }, [authReady]);
+
   const shiftRows = useMemo(() => (shifts.length > 0 ? shifts : getDefaultShifts()), [shifts]);
   const activeShift = currentShift(shiftRows);
-  const activeReport = reportSummaries[selectedReport];
+
+  const dashboard = useMemo(() => {
+    const today = new Date();
+    const studentsById = new Map<number, StoreRow>();
+    const studentsByCode = new Map<string, StoreRow>();
+    rows.students.forEach((student) => {
+      studentsById.set(toNumber(student.id), student);
+      const code = toText(student.student_code || student.studentCode);
+      if (code) studentsByCode.set(code, student);
+    });
+
+    const todayVisits = rows.visits.filter((row) => isSameDay(dateFromRow(row), today));
+    const monthVisits = rows.visits.filter((row) => isSameMonth(dateFromRow(row), today));
+    const pendingVisits = rows.visits.filter(isPendingVisit);
+    const severeVisits = rows.visits.filter(isSevereVisit);
+    const lowStock = rows.medicines.filter((row) => stockQty(row) <= reorderLevel(row));
+    const totalStock = rows.medicines.reduce((sum, row) => sum + stockQty(row), 0);
+
+    const recentRecords = [...rows.visits]
+      .sort((a, b) => {
+        const dateA = dateFromRow(a)?.getTime() || 0;
+        const dateB = dateFromRow(b)?.getTime() || 0;
+        return dateB - dateA || toNumber(b.id) - toNumber(a.id);
+      })
+      .slice(0, 3)
+      .map((row) => {
+        const student = studentsById.get(toNumber(row.student_id)) || studentsByCode.get(toText(row.student_code || row.student_id));
+        const status = visitStatus(row);
+        return {
+          name: studentName(student) !== "-" ? studentName(student) : toText(row.student_name) || "ไม่ระบุชื่อ",
+          code: toText(student?.student_code || row.student_code) || "-",
+          date: formatDate(dateFromRow(row)),
+          status,
+          badge: badgeForStatus(status)
+        };
+      });
+
+    const categoryTotals = new Map<string, number>();
+    rows.medicines.forEach((row) => {
+      categoryTotals.set(categoryName(row), (categoryTotals.get(categoryName(row)) || 0) + stockQty(row));
+    });
+    const topCategories = Array.from(categoryTotals.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 3)
+      .map(([label, value]) => ({
+        label,
+        value,
+        percent: totalStock > 0 ? Math.round((value / totalStock) * 100) : 0
+      }));
+
+    return {
+      todayVisits,
+      monthVisits,
+      pendingVisits,
+      severeVisits,
+      lowStock,
+      totalStock,
+      recentRecords,
+      healthBars: buildDayBars(rows.visits),
+      topCategories,
+      statCards: [
+        { label: "ผู้ป่วยวันนี้", value: String(todayVisits.length), icon: "🧑‍⚕️", tone: "blue" },
+        { label: "รอรักษา", value: String(pendingVisits.length), icon: "📋", tone: "amber" },
+        { label: "ยาพร้อมใช้", value: String(totalStock), icon: "💊", tone: "green" },
+        { label: "เคสเร่งด่วน", value: String(severeVisits.length), icon: "📈", tone: "sky" }
+      ]
+    };
+  }, [rows]);
+
+  const activeReport = useMemo(() => {
+    const reports = {
+      daily: {
+        title: "รายงานรายวัน",
+        description: "สรุปข้อมูลที่บันทึกจริงในวันนี้จาก Google Sheet",
+        metrics: [
+          { label: "ผู้เข้ารับบริการ", value: `${dashboard.todayVisits.length} คน` },
+          { label: "คิวที่ยังต้องติดตาม", value: `${dashboard.pendingVisits.length} คิว` },
+          { label: "เคสเร่งด่วน", value: `${dashboard.severeVisits.length} เคส` }
+        ]
+      },
+      monthly: {
+        title: "รายงานรายเดือน",
+        description: "ดูปริมาณงานเดือนนี้จากข้อมูลการรักษาที่บันทึกไว้",
+        metrics: [
+          { label: "ผู้ป่วยเดือนนี้", value: `${dashboard.monthVisits.length} คน` },
+          { label: "นักศึกษาทั้งหมด", value: `${rows.students.length} คน` },
+          { label: "ประเมินบริการ", value: `${rows.feedback.length} รายการ` }
+        ]
+      },
+      students: {
+        title: "รายงานนักศึกษา",
+        description: "สรุปฐานข้อมูลนักศึกษาและประวัติการเข้ารับบริการ",
+        metrics: [
+          { label: "นักศึกษาในระบบ", value: `${rows.students.length} คน` },
+          { label: "ประวัติการรักษา", value: `${rows.visits.length} รายการ` },
+          { label: "รอติดตาม", value: `${dashboard.pendingVisits.length} รายการ` }
+        ]
+      },
+      medicine: {
+        title: "รายงานการใช้ยา",
+        description: "สรุปคลังยาและรายการที่ควรเติมสต็อก",
+        metrics: [
+          { label: "จำนวนยาในคลัง", value: `${dashboard.totalStock} หน่วย` },
+          { label: "ยาใกล้หมด", value: `${dashboard.lowStock.length} รายการ` },
+          { label: "ประวัติจ่ายยา", value: `${rows.visitMedicines.length} รายการ` }
+        ]
+      }
+    } satisfies Record<ReportKey, { title: string; description: string; metrics: Array<{ label: string; value: string }> }>;
+
+    return reports[selectedReport];
+  }, [dashboard, rows.feedback.length, rows.students.length, rows.visitMedicines.length, rows.visits.length, selectedReport]);
 
   function handleShiftInput(id: ShiftRecord["id"], field: keyof Omit<ShiftRecord, "id">) {
     return (event: ChangeEvent<HTMLInputElement>) => {
@@ -166,7 +357,7 @@ export default function DashboardPage() {
           <div className={styles.dashboardBrandLine}>
             <img src="/logo.png" alt="ระบบห้องพยาบาล" className={styles.dashboardBrandLogo} />
             <div>
-              <p className={styles.dashboardEyebrow}>Nursing Room Dashboard</p>
+              <p className={styles.dashboardEyebrow}>NURSE ROOM</p>
               <h2 className={styles.dashboardTitle}>ศูนย์ดูแลสุขภาพนักศึกษา</h2>
             </div>
           </div>
@@ -183,8 +374,10 @@ export default function DashboardPage() {
           </div>
         </header>
 
+        {dataMessage ? <div className={styles.alertBanner}>{dataMessage}</div> : null}
+
         <div className={styles.dashboardStatsGrid}>
-          {statCards.map((card) => (
+          {dashboard.statCards.map((card) => (
             <article key={card.label} className={`${styles.dashboardStatCard} ${styles[`dashboardTone${card.tone}`]}`}>
               <span className={styles.dashboardStatIcon}>{card.icon}</span>
               <div>
@@ -198,7 +391,7 @@ export default function DashboardPage() {
         <div className={styles.dashboardMainGrid}>
           <article className={styles.dashboardPanel}>
             <div className={styles.dashboardPanelHead}>
-              <h3>Quick Actions</h3>
+              <h3>งานด่วน</h3>
             </div>
             <div className={styles.dashboardActionList}>
               {quickActions.map((action, index) => (
@@ -212,40 +405,44 @@ export default function DashboardPage() {
 
           <article className={`${styles.dashboardPanel} ${styles.dashboardRecordPanel}`}>
             <div className={styles.dashboardPanelHead}>
-              <h3>Recent Patient Records</h3>
-              <Link href="/nurse/treatment">View All</Link>
+              <h3>ประวัติผู้ป่วยล่าสุด</h3>
+              <Link href="/nurse/treatment">ดูทั้งหมด</Link>
             </div>
             <div className={styles.dashboardRecordTable}>
               <div className={styles.dashboardRecordHead}>
                 <span>ชื่อ</span>
-                <span>อายุ</span>
+                <span>รหัส</span>
                 <span>วันที่</span>
                 <span>สถานะ</span>
               </div>
-              {recentRecords.map((record) => (
-                <div key={record.name} className={styles.dashboardRecordRow}>
-                  <span>{record.name}</span>
-                  <span>{record.age}</span>
-                  <span>{record.date}</span>
-                  <em className={`${styles.dashboardStatusBadge} ${styles[`dashboardBadge${record.badge}`]}`}>{record.status}</em>
-                </div>
-              ))}
+              {dashboard.recentRecords.length > 0 ? (
+                dashboard.recentRecords.map((record) => (
+                  <div key={`${record.code}-${record.date}-${record.status}`} className={styles.dashboardRecordRow}>
+                    <span>{record.name}</span>
+                    <span>{record.code}</span>
+                    <span>{record.date}</span>
+                    <em className={`${styles.dashboardStatusBadge} ${styles[`dashboardBadge${record.badge}`]}`}>{record.status}</em>
+                  </div>
+                ))
+              ) : (
+                <p className={styles.infoText}>ยังไม่มีประวัติการรักษาในระบบ</p>
+              )}
             </div>
           </article>
 
           <article className={styles.dashboardPanel}>
             <div className={styles.dashboardPanelHead}>
-              <h3>Upcoming Appointments</h3>
+              <h3>เวรประจำวันนี้</h3>
             </div>
             <div className={styles.dashboardAppointmentList}>
-              {shiftRows.slice(0, 3).map((shift, index) => (
+              {shiftRows.slice(0, 3).map((shift) => (
                 <div key={shift.id} className={styles.dashboardAppointmentItem}>
-                  <strong>{index === 0 ? "09:00" : index === 1 ? "11:30" : "13:00"}</strong>
+                  <strong>{shift.time.split("-")[0]?.trim() || "-"}</strong>
                   <div>
                     <b>{shift.nurse || "พยาบาลเวร"}</b>
                     <small>{shift.label} · {shift.time}</small>
                   </div>
-                  <span>{index === 0 ? "👤" : index === 1 ? "➕" : "🗓️"}</span>
+                  <span>👤</span>
                 </div>
               ))}
             </div>
@@ -255,38 +452,44 @@ export default function DashboardPage() {
         <div className={styles.dashboardChartGrid}>
           <article className={styles.dashboardPanel}>
             <div className={styles.dashboardPanelHead}>
-              <h3>Health Stats Overview</h3>
-              <Link href="#reports">View All</Link>
+              <h3>สรุปงานห้องพยาบาล</h3>
+              <Link href="#reports">ดูรายงาน</Link>
             </div>
             <div className={styles.dashboardBarChart}>
-              {healthBars.map((item) => (
+              {dashboard.healthBars.map((item) => (
                 <div key={item.day} className={styles.dashboardBarGroup}>
-                  <span style={{ height: `${item.visits}%` }} />
-                  <span style={{ height: `${item.treatment}%` }} />
-                  <span style={{ height: `${item.recovered}%` }} />
+                  <span style={{ height: `${item.visitsHeight}%` }} />
+                  <span style={{ height: `${item.treatmentHeight}%` }} />
+                  <span style={{ height: `${item.recoveredHeight}%` }} />
                   <small>{item.day}</small>
                 </div>
               ))}
             </div>
             <div className={styles.dashboardChartLegend}>
               <span><i className={styles.legendBlue} /> ผู้ป่วย</span>
-              <span><i className={styles.legendGreen} /> รักษา</span>
-              <span><i className={styles.legendSky} /> หายแล้ว</span>
+              <span><i className={styles.legendGreen} /> รอติดตาม</span>
+              <span><i className={styles.legendSky} /> เสร็จสิ้น</span>
             </div>
           </article>
 
           <article className={styles.dashboardPanel}>
             <div className={styles.dashboardPanelHead}>
-              <h3>Medication Stock</h3>
+              <h3>สรุปคลังยา</h3>
             </div>
             <div className={styles.dashboardPieWrap}>
               <div className={styles.dashboardPieChart}>
-                <span>96</span>
+                <span>{dashboard.totalStock}</span>
               </div>
               <ul className={styles.dashboardPieLegend}>
-                <li><i className={styles.legendBlue} /> ยาแก้ปวด 38%</li>
-                <li><i className={styles.legendGreen} /> ยาสามัญ 30%</li>
-                <li><i className={styles.legendTeal} /> เวชภัณฑ์ 28%</li>
+                {dashboard.topCategories.length > 0 ? (
+                  dashboard.topCategories.map((item, index) => (
+                    <li key={item.label}>
+                      <i className={index === 0 ? styles.legendBlue : index === 1 ? styles.legendGreen : styles.legendTeal} /> {item.label} {item.percent}%
+                    </li>
+                  ))
+                ) : (
+                  <li><i className={styles.legendBlue} /> ยังไม่มีข้อมูลยา</li>
+                )}
               </ul>
             </div>
           </article>

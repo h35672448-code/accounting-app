@@ -11,21 +11,21 @@ const primaryActions = [
     href: "/nurse/dashboard#today-shift",
     icon: "👩‍⚕️",
     title: "เวรวันนี้",
-    text: "ดูรายชื่อเจ้าหน้าที่เวรและช่องทางติดต่อในวันนี้",
+    text: "",
     iconClass: styles.iconGreen
   },
   {
     href: "/nurse/symptom",
     icon: "🩺",
     title: "แจ้งอาการ",
-    text: "กรอกอาการล่วงหน้าเพื่อลดเวลารอคิวหน้าห้องพยาบาล",
+    text: "",
     iconClass: styles.iconOrange
   },
   {
     href: "/nurse/queue",
     icon: "📋",
     title: "ดูคิว",
-    text: "ติดตามสถานะคิวผู้ป่วยและการเรียกคิวล่าสุด",
+    text: "",
     iconClass: styles.iconBlue
   }
 ];
@@ -90,13 +90,9 @@ export default function NurseHomePage() {
       <section className={styles.gridTwo}>
         <article className={styles.panel}>
           <div>
-            <h3 className={styles.sectionTitle}>ข่าวประจำวันนี้</h3>
+            <h3 className={styles.sectionTitle}>ข่าวห้องพยาบาล</h3>
+            <p className={styles.sectionSub}>ประกาศล่าสุดจะแสดงด้านบนอัตโนมัติ และจัดการได้ที่หน้า ข่าว</p>
           </div>
-          <ul className={styles.listPlain}>
-            <li>เปิดลงทะเบียนฉีดวัคซีนไข้หวัดใหญ่ วันที่ 18-20 มีนาคม 2026</li>
-            <li>แนะนำให้นักศึกษาดื่มน้ำอย่างน้อย 6-8 แก้วต่อวันช่วงอากาศร้อน</li>
-            <li>นักศึกษาที่มีโรคประจำตัวควรอัปเดตข้อมูลในระบบทุกต้นภาค</li>
-          </ul>
           <Link href="/nurse/news" className={`${styles.button} ${styles.btnPrimary}`}>
             📰 ดูข่าวทั้งหมด
           </Link>

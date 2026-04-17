@@ -6,6 +6,7 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import styles from "./nurse.module.css";
 import { NURSE_SESSION_STORAGE_KEY, getCurrentRole } from "./lib/auth";
+import { resolveImageUrl } from "./lib/imageUrl";
 
 type ThemeMode = "warm" | "mono";
 type NewsRow = Record<string, unknown>;
@@ -57,7 +58,7 @@ function rowToBanner(row: NewsRow, index: number): NewsBanner {
     id: toNumber(row.id, index + 1),
     title: toText(row.title),
     detail: toText(row.detail),
-    image: toText(row.image_url || row.image) || NEWS_FALLBACK_IMAGE,
+    image: resolveImageUrl(row.image_url || row.image, NEWS_FALLBACK_IMAGE),
     dateText: toDateText(row.published_at || row.date)
   };
 }
@@ -209,19 +210,21 @@ export default function NurseLayout({ children }: { children: ReactNode }) {
               </p>
               <p className={styles.timeShift}>👩‍⚕️ {shiftByHour(now.getHours(), language)}</p>
             </div>
-            <div className={styles.userChip}>
-              {currentRole === "admin"
+            {currentRole === "guest" ? (
+              <Link href="/nurse/login" className={styles.userChip}>
+                {language === "th" ? "🔐 เข้าสู่ระบบ" : "🔐 Login"}
+              </Link>
+            ) : (
+              <div className={styles.userChip}>
+                {currentRole === "admin"
                 ? language === "th"
                   ? "👤 ผู้ดูแล"
                   : "👤 Admin"
-                : currentRole === "user"
-                  ? language === "th"
-                    ? "👤 ผู้ใช้"
-                    : "👤 Staff"
-                  : language === "th"
-                    ? "👤 ผู้ชม"
-                    : "👤 Viewer"}
-            </div>
+                : language === "th"
+                  ? "👤 ผู้ใช้"
+                  : "👤 Staff"}
+              </div>
+            )}
           </div>
         </header>
 

@@ -258,6 +258,7 @@
   font-size: 0.78rem;
   font-weight: 700;
   color: var(--text-main);
+  text-decoration: none;
   white-space: nowrap;
   box-shadow:
     0 10px 18px rgba(86, 71, 51, 0.08),

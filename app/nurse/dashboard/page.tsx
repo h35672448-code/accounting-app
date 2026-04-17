@@ -7,6 +7,7 @@ import styles from "../nurse.module.css";
 import { getCurrentSession } from "../lib/auth";
 import { fetchEntity, type StoreRow } from "../lib/storeApi";
 import { type ShiftRecord, getDefaultShifts, loadShiftSchedule, saveShiftSchedule } from "../lib/shiftSchedule";
+import { fetchShiftScheduleFromStore, saveShiftScheduleToStore } from "../lib/shiftStore";
 
 const adminSidebar = [
   { href: "#overview", icon: "🏥", label: "หน้าควบคุม" },
@@ -175,6 +176,13 @@ export default function DashboardPage() {
 
     setIsAdmin(true);
     setShifts(loadShiftSchedule());
+    void fetchShiftScheduleFromStore()
+      .then((storeShifts) => {
+        if (storeShifts) setShifts(storeShifts);
+      })
+      .catch(() => {
+        // Keep local cached shifts if Google Sheet is temporarily unavailable.
+      });
     setAuthReady(true);
   }, [router]);
 
@@ -324,10 +332,15 @@ export default function DashboardPage() {
     };
   }
 
-  function handleSaveShifts() {
+  async function handleSaveShifts() {
     if (!isAdmin) return;
     saveShiftSchedule(shiftRows);
-    setMessage("บันทึกเวรเรียบร้อย");
+    try {
+      await saveShiftScheduleToStore(shiftRows);
+      setMessage("บันทึกเวรลง Google Sheet เรียบร้อย");
+    } catch (error) {
+      setMessage(error instanceof Error ? `บันทึกเวรในเครื่องแล้ว แต่ลงชีตไม่สำเร็จ: ${error.message}` : "บันทึกเวรในเครื่องแล้ว แต่ลงชีตไม่สำเร็จ");
+    }
   }
 
   if (!authReady) {
@@ -531,7 +544,7 @@ export default function DashboardPage() {
               <h3>แก้ไขเวรวันนี้</h3>
               <p>เวรปัจจุบัน: {activeShift.nurse || "-"} · {activeShift.time || "-"}</p>
             </div>
-            <button className={`${styles.button} ${styles.btnPrimary}`} type="button" onClick={handleSaveShifts}>
+            <button className={`${styles.button} ${styles.btnPrimary}`} type="button" onClick={() => void handleSaveShifts()}>
               💾 บันทึกเวร
             </button>
           </div>

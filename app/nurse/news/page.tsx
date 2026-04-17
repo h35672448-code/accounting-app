@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
 import styles from "../nurse.module.css";
+import { resolveImageUrl } from "../lib/imageUrl";
 import { canWriteEntity, fetchEntity, saveEntity, StoreRow } from "../lib/storeApi";
 
 type NewsItem = {
@@ -43,7 +44,7 @@ function rowToNews(row: StoreRow, index: number): NewsItem {
     id: toNumber(row.id, index + 1),
     title: toText(row.title),
     detail: toText(row.detail),
-    image: toText(row.image_url || row.image) || NEWS_FALLBACK_IMAGE,
+    image: resolveImageUrl(row.image_url || row.image, NEWS_FALLBACK_IMAGE),
     date: toDateInputValue(row.published_at || row.date)
   };
 }
@@ -225,7 +226,7 @@ export default function NewsPage() {
                 <p className={styles.infoText}>ใช้ลิงก์รูปภาพปกติ เช่น จาก Google Drive แบบลิงก์ตรง หรือเว็บฝากรูป</p>
                 {image ? (
                   <img
-                    src={image}
+                    src={resolveImageUrl(image, NEWS_FALLBACK_IMAGE)}
                     alt="ตัวอย่างรูปข่าว"
                     className={styles.tableAvatar}
                     style={{ width: 84, height: 54, marginTop: 6 }}

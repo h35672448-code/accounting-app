@@ -3,7 +3,8 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getCurrentRole } from "./lib/auth";
-import { NURSE_SHIFT_EVENT, type ShiftRecord, loadShiftSchedule } from "./lib/shiftSchedule";
+import { NURSE_SHIFT_EVENT, type ShiftRecord, loadShiftSchedule, saveShiftSchedule } from "./lib/shiftSchedule";
+import { fetchShiftScheduleFromStore } from "./lib/shiftStore";
 import styles from "./nurse.module.css";
 
 const publicActions = [
@@ -79,7 +80,20 @@ export default function NurseHomePage() {
   useEffect(() => {
     const syncShifts = () => setShifts(loadShiftSchedule());
     const syncRole = () => setRole(getCurrentRole());
+    const syncStoreShifts = async () => {
+      try {
+        const storeShifts = await fetchShiftScheduleFromStore();
+        if (storeShifts) {
+          setShifts(storeShifts);
+          saveShiftSchedule(storeShifts);
+        }
+      } catch {
+        // Use the local cached shift schedule if the sheet is temporarily unavailable.
+      }
+    };
+
     syncShifts();
+    void syncStoreShifts();
     syncRole();
     window.addEventListener(NURSE_SHIFT_EVENT, syncShifts);
     window.addEventListener("storage", syncShifts);

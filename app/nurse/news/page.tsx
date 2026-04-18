@@ -267,7 +267,7 @@ export default function NewsPage() {
             ) : (
               news.map((item) => (
                 <article key={item.id} className={styles.newsCard}>
-                  <img src={item.image} alt={item.title} className={styles.newsImage} />
+                  <img src={resolveImageUrl(item.image, NEWS_FALLBACK_IMAGE)} alt={item.title} className={styles.newsImage} />
                   <div>
                     <p className={styles.infoValue}>{item.title}</p>
                     <p className={styles.cardText}>{item.detail}</p>

@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import styles from "../nurse.module.css";
 import { fetchEntity, saveEntity, StoreRow } from "../lib/storeApi";
+import { resolveImageUrl } from "../lib/imageUrl";
 
 type Student = {
   id: number;
@@ -76,7 +77,7 @@ function rowToStudent(row: StoreRow, index: number): Student {
   const id = toNumber(row.id, index + 1);
   return {
     id,
-    photoUrl: toText(row.photo_url || row.photoUrl) || AVATAR_FALLBACKS[index % AVATAR_FALLBACKS.length],
+    photoUrl: resolveImageUrl(row.photo_url || row.photoUrl, AVATAR_FALLBACKS[index % AVATAR_FALLBACKS.length]),
     studentCode: toText(row.student_code || row.studentCode),
     firstName: toText(row.first_name || row.firstName),
     lastName: toText(row.last_name || row.lastName),
@@ -253,7 +254,7 @@ export default function StudentsPage() {
               <p className={styles.infoText}>ใช้ลิงก์รูปภาพเท่านั้น เพื่อให้บันทึกลง Google Sheet ได้เสถียร</p>
               {form.photoUrl ? (
                 <img
-                  src={form.photoUrl}
+                  src={resolveImageUrl(form.photoUrl, STUDENT_IMAGE_FALLBACK)}
                   alt="ตัวอย่างรูปนักศึกษา"
                   className={styles.tableAvatar}
                   style={{ width: 64, height: 64, marginTop: 6 }}
@@ -371,7 +372,7 @@ export default function StudentsPage() {
             {filteredStudents.slice(0, 6).map((student) => (
               <article key={student.id} className={styles.personCard}>
                 <img
-                  src={student.photoUrl}
+                  src={resolveImageUrl(student.photoUrl, STUDENT_IMAGE_FALLBACK)}
                   alt={student.firstName}
                   className={styles.personImage}
                   onError={(event) => {
@@ -424,7 +425,7 @@ export default function StudentsPage() {
                   <tr key={student.id}>
                     <td>
                       <img
-                        src={student.photoUrl}
+                        src={resolveImageUrl(student.photoUrl, STUDENT_IMAGE_FALLBACK)}
                         alt={student.firstName}
                         width={48}
                         height={48}

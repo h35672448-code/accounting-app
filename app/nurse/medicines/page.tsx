@@ -3,6 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import styles from "../nurse.module.css";
 import { fetchEntity, saveEntity, StoreRow } from "../lib/storeApi";
+import { resolveImageUrl } from "../lib/imageUrl";
 
 type Medicine = {
   id: number;
@@ -69,9 +70,7 @@ function toText(value: unknown) {
 function rowToMedicine(row: StoreRow, index: number): Medicine {
   return {
     id: toNumber(row.id, index + 1),
-    image:
-      toText(row.image_url || row.image) ||
-      MEDICINE_IMAGE_FALLBACK,
+    image: resolveImageUrl(row.image_url || row.image, MEDICINE_IMAGE_FALLBACK),
     code: toText(row.medicine_code || row.code),
     name: toText(row.name),
     category: toText(row.category),
@@ -252,7 +251,7 @@ export default function MedicinesPage() {
               <p className={styles.infoText}>ใช้ลิงก์รูปภาพเท่านั้น เพื่อให้บันทึกลง Google Sheet ได้เสถียร</p>
               {form.image ? (
                 <img
-                  src={form.image}
+                  src={resolveImageUrl(form.image, MEDICINE_IMAGE_FALLBACK)}
                   alt="ตัวอย่างรูปยา"
                   className={styles.tableAvatar}
                   style={{ width: 64, height: 64, marginTop: 6 }}
@@ -383,7 +382,7 @@ export default function MedicinesPage() {
                   <tr key={item.id}>
                     <td>
                       <img
-                        src={item.image}
+                        src={resolveImageUrl(item.image, MEDICINE_IMAGE_FALLBACK)}
                         alt={item.name}
                         width={48}
                         height={48}

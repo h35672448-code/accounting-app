@@ -15,11 +15,13 @@ function toNumber(value: unknown, fallback: number) {
 }
 
 function isShiftRow(row: StoreRow) {
-  return toText(row.type || row.category || row.entity) === SHIFT_MARKER;
+  const marker = toText(row.type || row.category || row.entity);
+  const id = toText(row.id);
+  return marker === SHIFT_MARKER || id.startsWith("shift-");
 }
 
 function normalizeShiftSlot(value: unknown, fallback: ShiftSlot): ShiftSlot {
-  const raw = toText(value);
+  const raw = toText(value).replace(/^shift-/, "");
   if (raw === "morning" || raw === "afternoon" || raw === "emergency") return raw;
   return fallback;
 }

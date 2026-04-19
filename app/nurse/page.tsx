@@ -186,6 +186,16 @@ export default function NurseHomePage() {
           ))}
         </div>
       </section>
+
+      {isGuest ? (
+        <section className={styles.visitorThanksCard} aria-label="ข้อความสำหรับผู้เยี่ยมชม">
+          <span className={styles.visitorThanksIcon}>🌿</span>
+          <div>
+            <p className={styles.visitorThanksTitle}>ขอบคุณที่เยี่ยมชมนะ ✨</p>
+            <p className={styles.visitorThanksText}>หน้านี้เปิดให้ผู้มีลิงก์เข้าชมข่าวและเวรประจำวันได้อย่างสะดวก</p>
+          </div>
+        </section>
+      ) : null}
     </>
   );
 }

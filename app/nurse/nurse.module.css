@@ -1274,6 +1274,49 @@
   background: rgba(239, 250, 255, 0.98);
 }
 
+.visitorThanksCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-radius: 22px;
+  border: 1px solid rgba(169, 210, 225, 0.72);
+  background:
+    radial-gradient(circle at 8% 12%, rgba(174, 223, 199, 0.28), transparent 34%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.88), rgba(232, 248, 247, 0.82));
+  box-shadow:
+    0 16px 30px rgba(52, 91, 111, 0.1),
+    inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  padding: 14px 16px;
+  color: var(--text-main);
+}
+
+.visitorThanksIcon {
+  width: 42px;
+  height: 42px;
+  border-radius: 15px;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  background: linear-gradient(145deg, rgba(222, 244, 230, 0.96), rgba(186, 223, 207, 0.88));
+  box-shadow:
+    0 10px 18px rgba(55, 98, 86, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.88);
+  font-size: 1.22rem;
+}
+
+.visitorThanksTitle {
+  margin: 0;
+  font-weight: 900;
+  font-size: 0.98rem;
+}
+
+.visitorThanksText {
+  margin: 2px 0 0;
+  color: var(--text-muted);
+  font-size: 0.84rem;
+  line-height: 1.45;
+}
+
 .toolPillIcon {
   display: inline-grid;
   place-items: center;

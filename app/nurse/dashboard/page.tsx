@@ -6,7 +6,7 @@ import { ChangeEvent, useEffect, useMemo, useState } from "react";
 import styles from "../nurse.module.css";
 import { getCurrentSession } from "../lib/auth";
 import { fetchEntity, type StoreRow } from "../lib/storeApi";
-import { type ShiftRecord, getDefaultShifts, loadShiftSchedule, saveShiftSchedule } from "../lib/shiftSchedule";
+import { type ShiftRecord, getDefaultShifts } from "../lib/shiftSchedule";
 import { fetchShiftScheduleFromStore, saveShiftScheduleToStore } from "../lib/shiftStore";
 
 const adminSidebar = [
@@ -175,7 +175,7 @@ export default function DashboardPage() {
     }
 
     setIsAdmin(true);
-    setShifts(loadShiftSchedule());
+    setShifts(getDefaultShifts());
     void fetchShiftScheduleFromStore()
       .then((storeShifts) => {
         if (storeShifts) setShifts(storeShifts);
@@ -334,12 +334,11 @@ export default function DashboardPage() {
 
   async function handleSaveShifts() {
     if (!isAdmin) return;
-    saveShiftSchedule(shiftRows);
     try {
       await saveShiftScheduleToStore(shiftRows);
       setMessage("บันทึกเวรลง Google Sheet เรียบร้อย");
     } catch (error) {
-      setMessage(error instanceof Error ? `บันทึกเวรในเครื่องแล้ว แต่ลงชีตไม่สำเร็จ: ${error.message}` : "บันทึกเวรในเครื่องแล้ว แต่ลงชีตไม่สำเร็จ");
+      setMessage(error instanceof Error ? `บันทึกเวรไม่สำเร็จ: ${error.message}` : "บันทึกเวรไม่สำเร็จ");
     }
   }
 
@@ -452,7 +451,7 @@ export default function DashboardPage() {
                 <div key={shift.id} className={styles.dashboardAppointmentItem}>
                   <strong>{shift.time.split("-")[0]?.trim() || "-"}</strong>
                   <div>
-                    <b>{shift.nurse || "พยาบาลเวร"}</b>
+                    <b>{shift.nurse || "ยังไม่ได้กำหนดผู้รับเวร"}</b>
                     <small>{shift.label} · {shift.time}</small>
                   </div>
                   <span>👤</span>

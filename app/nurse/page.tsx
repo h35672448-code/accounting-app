@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { getCurrentRole } from "./lib/auth";
-import { NURSE_SHIFT_EVENT, type ShiftRecord, loadShiftSchedule, saveShiftSchedule } from "./lib/shiftSchedule";
+import { NURSE_SHIFT_EVENT, type ShiftRecord, getDefaultShifts, loadShiftSchedule, saveShiftSchedule } from "./lib/shiftSchedule";
 import { fetchShiftScheduleFromStore } from "./lib/shiftStore";
 import styles from "./nurse.module.css";
 
@@ -92,7 +92,7 @@ export default function NurseHomePage() {
       }
     };
 
-    syncShifts();
+    setShifts(getDefaultShifts());
     void syncStoreShifts();
     syncRole();
     window.addEventListener(NURSE_SHIFT_EVENT, syncShifts);

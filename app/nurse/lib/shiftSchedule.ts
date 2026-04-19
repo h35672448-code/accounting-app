@@ -18,22 +18,22 @@ const DEFAULT_SHIFTS: ShiftRecord[] = [
     id: "morning",
     label: "ช่วงเช้า",
     time: "08:00 - 12:00",
-    nurse: "พยาบาลวิลาสินี",
-    contact: "ต่อ 108"
+    nurse: "",
+    contact: ""
   },
   {
     id: "afternoon",
     label: "ช่วงบ่าย",
     time: "12:00 - 16:00",
-    nurse: "พยาบาลธนภรณ์",
-    contact: "ต่อ 108"
+    nurse: "",
+    contact: ""
   },
   {
     id: "emergency",
     label: "เวรฉุกเฉิน",
     time: "16:00 - 20:00",
-    nurse: "พยาบาลสุจิตรา",
-    contact: "ต่อ 118"
+    nurse: "",
+    contact: ""
   }
 ];
 

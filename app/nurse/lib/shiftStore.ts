@@ -15,7 +15,7 @@ function toNumber(value: unknown, fallback: number) {
 }
 
 function isShiftRow(row: StoreRow) {
-  const marker = toText(row.type || row.category || row.entity);
+  const marker = toText(row.type || row.category || row.entity || row.alert_type);
   const id = toText(row.id);
   return marker === SHIFT_MARKER || id.startsWith("shift-");
 }
@@ -26,20 +26,52 @@ function normalizeShiftSlot(value: unknown, fallback: ShiftSlot): ShiftSlot {
   return fallback;
 }
 
+function parseShiftMessage(value: unknown): Partial<ShiftRecord> {
+  const raw = toText(value);
+  if (!raw) return {};
+
+  try {
+    const parsed = JSON.parse(raw) as Record<string, unknown>;
+    return {
+      label: toText(parsed.label),
+      time: toText(parsed.time),
+      nurse: toText(parsed.nurse),
+      contact: toText(parsed.contact)
+    };
+  } catch {
+    return {};
+  }
+}
+
 function rowToShift(row: StoreRow, fallback: ShiftRecord): ShiftRecord {
+  const message = parseShiftMessage(row.message);
   return {
-    id: normalizeShiftSlot(row.shift_id || row.id, fallback.id),
-    label: toText(row.label) || fallback.label,
-    time: toText(row.time) || fallback.time,
-    nurse: toText(row.nurse) || fallback.nurse,
-    contact: toText(row.contact) || fallback.contact
+    id: normalizeShiftSlot(row.shift_id || row.status || row.id, fallback.id),
+    label: toText(row.label) || message.label || fallback.label,
+    time: toText(row.time) || message.time || fallback.time,
+    nurse: toText(row.nurse) || message.nurse || fallback.nurse,
+    contact: toText(row.contact) || message.contact || fallback.contact
   };
 }
 
 function shiftToRow(shift: ShiftRecord, index: number): StoreRow {
   const now = new Date().toISOString();
+  const message = JSON.stringify({
+    label: shift.label,
+    time: shift.time,
+    nurse: shift.nurse,
+    contact: shift.contact
+  });
+
   return {
     id: `shift-${shift.id}`,
+    alert_type: SHIFT_MARKER,
+    status: shift.id,
+    message,
+    visit_id: "",
+    medicine_id: "",
+    created_at: now,
+    resolved_at: now,
     type: SHIFT_MARKER,
     category: SHIFT_MARKER,
     entity: SHIFT_MARKER,
